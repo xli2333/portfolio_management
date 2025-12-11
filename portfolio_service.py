@@ -60,7 +60,10 @@ class PortfolioService:
 
     def _load_a_share_names(self):
         """Load A-share name mapping from CSV."""
-        csv_path = "A share names.csv"
+        # Use absolute path to ensure file is found in cloud environments
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        csv_path = os.path.join(base_dir, "A share names.csv")
+        
         if os.path.exists(csv_path):
             try:
                 import csv
@@ -201,7 +204,26 @@ class PortfolioService:
             logger.error(f"Summary cache read error: {e}")
 
         if symbol in cache:
-            return cache[symbol]
+            cached_summary = cache[symbol]
+            # [Validation] If we have a mapped name, ensure the summary is high quality
+            # If mapped name exists but summary doesn't contain it (likely old/generic summary), force refresh.
+            # Also refresh if it looks like an error.
+            should_refresh = False
+            
+            if cached_summary.startswith("AI Generation Error") or cached_summary.startswith("Network Error"):
+                should_refresh = True
+            elif symbol.isdigit() and symbol in self.a_share_map:
+                mapped_name = self.a_share_map[symbol]
+                # Simple heuristic: if the Chinese name isn't in the summary, it might be an old summary
+                # (unless summary is very short).
+                # But to be safe, let's just trust the cache unless it's an error, 
+                # OR if the user specifically requests a refresh (not implemented yet).
+                # actually, let's just force refresh if it's "API Key Missing" or similar
+                if "API Key Missing" in cached_summary:
+                    should_refresh = True
+            
+            if not should_refresh:
+                return cached_summary
 
         # 2. Fetch from Gemini
         summary = self._fetch_gemini_summary(symbol)
