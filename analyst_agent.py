@@ -155,36 +155,92 @@ Please structure the report exactly as follows (Titles in Chinese):
 
     def generate_macro_strategy_report(self, category: str, context_text: str = "", model_name: str = "gemini-2.5-pro") -> str:
         """
-        Generates a specialized report for Macro or Strategy analysis.
-        Focuses on Short/Medium/Long term outlooks.
-        category: 'MACRO' or 'STRATEGY'
+        Generates a specialized report for Macro or Strategy analysis using a Multi-Agent Workflow.
+        Phase 1: 3 Sub-Agents gather fresh internet data.
+        Phase 2: Chief Editor synthesizes Search Data + Knowledge Base into a strategic report.
         """
         if not self.api_key:
             return "Error: API Key missing."
 
         current_date = os.environ.get('CURRENT_DATE', 'Today')
-        
+        logger.info(f"Starting Multi-Agent Research for {category}...")
+
+        # --- Phase 1: Distributed Research (Sub-Agents) ---
         if category == "MACRO":
+            # 1. Policy Agent
+            search_1 = self._run_research_task(
+                "Global & China Economy",
+                "Global Policy Researcher",
+                "Latest Federal Reserve interest rate decisions, ECB policy, China Politburo meeting notes, China Fiscal Stimulus updates, Monetary policy adjustments."
+            )
+            # 2. Economic Data Agent
+            search_2 = self._run_research_task(
+                "Global & China Economy",
+                "Economic Data Specialist",
+                "China GDP growth, CPI/PPI inflation data, Caixin PMI, US Non-farm payrolls, US CPI, 10-Year Treasury Yield trends."
+            )
+            # 3. Geopolitics Agent
+            search_3 = self._run_research_task(
+                "Global Markets",
+                "Geopolitical Risk Analyst",
+                "US-China trade relations, Regional conflicts (Middle East/Europe), Oil & Gold price trends due to geopolitics, Global supply chain disruptions."
+            )
+            
             role_title = "首席宏观经济顾问 (Chief Macro Economist)"
             report_title = "全球与中国宏观经济深度展望报告"
             core_task = "Analyze the current global and Chinese macroeconomic environment, focusing on policy, interest rates, GDP, and geopolitical risks."
+
         else: # STRATEGY
+            # 1. Sentiment Agent
+            search_1 = self._run_research_task(
+                "China A-Share & Global Markets",
+                "Market Sentiment Analyst",
+                "Market fear/greed index, VIX trend, Trading volume analysis, Northbound capital flows (Stock Connect), Institutional investor sentiment."
+            )
+            # 2. Sector Agent
+            search_2 = self._run_research_task(
+                "China A-Share Market",
+                "Sector Rotation Specialist",
+                "Top performing sectors this month, Sectors with institutional buying, rotation trends from Growth to Value (or vice versa), Theme concepts (e.g., AI, Low Altitude)."
+            )
+            # 3. Allocation Agent
+            search_3 = self._run_research_task(
+                "Global Assets",
+                "Asset Allocation Strategist",
+                "Equity Risk Premium (ERP), Bond Yield vs Dividend Yield comparison, Commodity trends, Currency (USD/CNY) impact on assets."
+            )
+
             role_title = "首席投资策略顾问 (Chief Investment Strategist)"
             report_title = "各大类资产配置与投资策略报告"
             core_task = "Formulate investment strategies, asset allocation advice, and risk management rules based on the current market environment."
 
+        # Combine Raw Search Data
+        raw_search_content = f"""
+=== RESEARCH AGENT 1: POLICY / SENTIMENT ===
+{search_1}
+
+=== RESEARCH AGENT 2: DATA / SECTORS ===
+{search_2}
+
+=== RESEARCH AGENT 3: RISKS / ALLOCATION ===
+{search_3}
+"""
+
+        # --- Phase 2: Synthesis (Chief Editor) ---
         prompt = f"""
 You are the {role_title}. 
 Your task is to write a high-level, forward-looking strategic report: "{report_title}".
 
 **Constraint:** The report MUST be written in **Simplified Chinese (简体中文)**.
 
-### Input Data
-1. **Internal Knowledge Base (Key Source):**
-{context_text[:150000]}
+### Information Sources
+I have dispatched 3 field researchers to gather the latest data. You must synthesize their findings along with our internal knowledge base.
 
-2. **Your General Knowledge:**
-Use your internal knowledge about current economic theories and historical market patterns.
+#### 1. Fresh Field Research (Latest Internet Data):
+{raw_search_content}
+
+#### 2. Internal Knowledge Base (User Uploads):
+{context_text[:150000]}
 
 ### {core_task}
 
@@ -199,6 +255,7 @@ Use your internal knowledge about current economic theories and historical marke
 - 最核心的3个结论。
 
 ## 2. 深度分析 (Deep Dive)
+- Integrate the "Fresh Field Research" data here.
 - (If Macro) Analyze: Growth (GDP), Inflation (CPI/PPI), Liquidity (Rates/Central Bank), and Policy.
 - (If Strategy) Analyze: Valuations, Sentiment, Capital Flows, and Sector Rotation.
 
@@ -221,7 +278,7 @@ For this section, you MUST provide distinct judgments for three time horizons:
 - List the top 3 "Black Swan" or "Gray Rhino" risks.
 
 ---
-**Instruction:** Be professional, objective, and decisive. Use the provided Knowledge Base as the primary source of truth if available.
+**Instruction:** Be professional, objective, and decisive. Use the provided Knowledge Base as the primary source of truth if available, but SUPPLEMENT it with the Fresh Field Research.
 """
 
         try:
