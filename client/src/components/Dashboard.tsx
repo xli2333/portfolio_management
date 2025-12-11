@@ -463,7 +463,8 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
 
     const formatMoney = (val: number | undefined | null, currency: string = 'USD') => {
         if (val === undefined || val === null) return '---';
-        return val.toLocaleString('zh-CN', { style: 'currency', currency: currency });
+        // Use en-US to get simple '$' for USD instead of 'US$'
+        return val.toLocaleString('en-US', { style: 'currency', currency: currency });
     };
 
     return (
@@ -627,7 +628,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                                     <div className="col-span-2 pr-2 overflow-hidden">
                                          <CompanySummary symbol={h.symbol} />
                                     </div>
-                                    <div className="col-span-1 text-right font-mono text-lg text-gray-600">
+                                    <div className="col-span-1 text-right font-mono text-sm text-gray-600">
                                         <EditableCell 
                                             value={h.cost_basis} 
                                             onSave={(v) => handleUpdateStock(h.symbol, 'cost_basis', v)}
@@ -635,7 +636,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                                             format={(v) => formatMoney(Number(v), h.currency)}
                                         />
                                     </div>
-                                    <div className="col-span-1 text-right font-mono text-lg">
+                                    <div className="col-span-1 text-right font-mono text-sm">
                                         <div>{formatMoney(h.current_price, h.currency)}</div>
                                     </div>
                                     <div className="col-span-1 text-right font-mono text-lg">
