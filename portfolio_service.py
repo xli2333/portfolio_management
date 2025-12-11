@@ -66,10 +66,22 @@ class PortfolioService:
             logger.error(f"Failed to load share names: {e}")
 
     def _load_a_share_names(self):
-        """Load A-share name mapping from CSV or Supabase (Fallback)."""
+        """Load A-share name mapping. Priority: Supabase -> Local CSV."""
         loaded_count = 0
         
-        # 1. Try CSV
+        # 1. Priority: Try Supabase
+        if self.use_supabase:
+            print("[Info] Loading A-Share names from Supabase (Priority)...")
+            try:
+                loaded_count = self._load_from_supabase_metadata()
+                if loaded_count > 0:
+                    print(f"[Success] Loaded {loaded_count} names from Supabase. Skipping CSV.")
+                    return
+            except Exception as e:
+                print(f"[Warn] Supabase load failed: {e}")
+
+        # 2. Fallback: Try CSV
+        print("[Info] Supabase yielded no names or failed. Trying Local CSV fallback...")
         try:
             base_dir = os.path.dirname(os.path.abspath(__file__))
             csv_path = os.path.join(base_dir, "A share names.csv")
@@ -105,40 +117,34 @@ class PortfolioService:
                                     loaded_count += 1
                     except Exception as gbk_e:
                         print(f"[Warn] CSV GBK load failed: {gbk_e}")
+            else:
+                 print(f"[Warn] CSV file not found at: {csv_path}")
+
         except Exception as e:
-            print(f"[Warn] File system error: {e}")
+            print(f"[Warn] File system error during CSV load: {e}")
+            
+        print(f"[Info] Final A-Share map size: {len(self.a_share_map)}")
 
-        # 2. Fallback to Supabase if CSV yielded nothing
-        if loaded_count == 0 and self.use_supabase:
-            print("[Info] No local CSV data found. Attempting Supabase fallback...")
-            self._load_from_supabase_metadata()
-        else:
-            print(f"[Info] Loaded {loaded_count} names from local CSV.")
-
-    def _load_from_supabase_metadata(self):
-        """Fetch stock metadata from Supabase table."""
+    def _load_from_supabase_metadata(self) -> int:
+        """Fetch stock metadata from Supabase table. Returns count loaded."""
+        count = 0
         try:
-            # Fetch all rows (Supabase default limit is usually 1000, need to paginate or request more)
-            # For simplicity, we request a large range.
-            # Note: A real prod app would paginate. 5000 rows might hit limits.
-            # Let's try fetching just what we need? No, we need the map.
-            # We'll try to fetch 10000 rows.
+            # Fetch large batch
             response = self.supabase.table("stock_metadata").select("symbol,name").limit(6000).execute()
             data = response.data
             
             if data:
-                count = 0
                 for row in data:
                     s = row.get('symbol')
                     n = row.get('name')
                     if s and n:
                         self.a_share_map[s] = n
                         count += 1
-                print(f"[Success] Loaded {count} names from Supabase.")
-            else:
-                print("[Warn] Supabase stock_metadata table is empty.")
         except Exception as e:
             print(f"[Error] Failed to load from Supabase: {e}")
+            # Do not re-raise, let fallback handle it
+            
+        return count
 
 
     def _init_local_storage(self):
