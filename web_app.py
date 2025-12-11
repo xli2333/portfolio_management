@@ -4,6 +4,8 @@
 """
 
 import sys
+import matplotlib
+matplotlib.use('Agg') # Prevent X server errors in headless environments
 # Force UTF-8 for stdout (fixes Windows console issues)
 try:
     sys.stdout.reconfigure(encoding='utf-8')
