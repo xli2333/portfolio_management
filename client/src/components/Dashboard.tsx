@@ -308,6 +308,9 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
             } else if (sortField === 'unrealized_pl_pct') {
                 valA = a.unrealized_pl_pct;
                 valB = b.unrealized_pl_pct;
+            } else if (sortField === 'day_change_pct') {
+                valA = a.day_change_pct;
+                valB = b.day_change_pct;
             } else if (sortField === 'name') {
                 valA = a.name;
                 valB = b.name;
@@ -566,14 +569,20 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                     <div className="border-t-4 border-black">
                         <div className="grid grid-cols-12 border-b-2 border-black py-4 text-sm font-bold font-serif text-gray-500">
                             <div 
-                                className="col-span-2 pl-2 cursor-pointer hover:text-black transition-colors flex items-center gap-1"
+                                className="col-span-3 pl-2 cursor-pointer hover:text-black transition-colors flex items-center gap-1"
                                 onClick={() => handleSort('name')}
                             >
                                 资产名称 {sortField === 'name' && (sortOrder === 'asc' ? '▲' : '▼')}
                             </div>
-                            <div className="col-span-2">简介</div>
+                            <div className="col-span-1">简介</div>
                             <div className="col-span-1 text-right">成本</div>
-                            <div className="col-span-2 text-right">现价</div>
+                            <div className="col-span-1 text-right">现价</div>
+                            <div 
+                                className="col-span-1 text-right cursor-pointer hover:text-black transition-colors flex items-center justify-end gap-1"
+                                onClick={() => handleSort('day_change_pct')}
+                            >
+                                涨跌 {sortField === 'day_change_pct' && (sortOrder === 'asc' ? '▲' : '▼')}
+                            </div>
                             <div className="col-span-1 text-right">数量</div>
                             <div 
                                 className="col-span-2 text-right cursor-pointer hover:text-black transition-colors flex items-center justify-end gap-1"
@@ -602,13 +611,13 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                                 >
                                     <div 
                                         onClick={() => onNavigate(h.symbol)}
-                                        className="col-span-2 pl-2 cursor-pointer hover:underline decoration-2 underline-offset-4"
+                                        className="col-span-3 pl-2 cursor-pointer hover:underline decoration-2 underline-offset-4"
                                         title="点击查看详情"
                                     >
                                         <div className="font-black text-xl tracking-tight leading-none font-mono text-black">{h.symbol}</div>
                                         <div className="text-xs text-gray-500 mt-1 font-serif truncate">{h.name}</div>
                                     </div>
-                                    <div className="col-span-2 pr-2">
+                                    <div className="col-span-1 pr-2">
                                         <CompanySummary symbol={h.symbol} />
                                     </div>
                                     <div className="col-span-1 text-right font-mono text-lg text-gray-600">
@@ -619,9 +628,11 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                                             format={(v) => formatMoney(Number(v), h.currency)}
                                         />
                                     </div>
-                                    <div className="col-span-2 text-right font-mono text-lg">
+                                    <div className="col-span-1 text-right font-mono text-lg">
                                         <div>{formatMoney(h.current_price, h.currency)}</div>
-                                        <div className={cn("text-xs font-bold", h.day_change_pct >= 0 ? "text-green-600" : "text-red-600")}>
+                                    </div>
+                                    <div className="col-span-1 text-right font-mono text-lg">
+                                        <div className={cn("font-bold", h.day_change_pct >= 0 ? "text-green-600" : "text-red-600")}>
                                             {h.day_change_pct > 0 ? '+' : ''}{h.day_change_pct.toFixed(2)}%
                                         </div>
                                     </div>
