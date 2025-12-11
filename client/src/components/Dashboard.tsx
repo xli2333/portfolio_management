@@ -625,9 +625,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                                     
                                     {/* Summary: 2 cols (Compact) */}
                                     <div className="col-span-2 pr-2 overflow-hidden">
-                                         <div className="text-[10px] text-gray-400 font-serif truncate" title="点击查看详情">
-                                            ...
-                                         </div>
+                                         <CompanySummary symbol={h.symbol} />
                                     </div>
                                     <div className="col-span-1 text-right font-mono text-lg text-gray-600">
                                         <EditableCell 
