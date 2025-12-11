@@ -213,10 +213,11 @@ class PortfolioService:
 
         if self.use_supabase:
             try:
-                # Insert the record directly. Supabase doesn't support "upsert" easily without a primary key constraint
-                # that includes user_id+symbol. For now, we append.
-                # Use upsert to handle re-adding/updating if primary key exists
-                self.supabase.table("holdings").upsert(record).execute()
+                # Use upsert with on_conflict parameter to update on duplicate (user_id, symbol)
+                self.supabase.table("holdings").upsert(
+                    record,
+                    on_conflict="user_id,symbol"
+                ).execute()
                 return {"status": "success", "msg": "Added/Updated in Supabase"}
             except Exception as e:
                 logger.error(f"Supabase write error: {e}")
