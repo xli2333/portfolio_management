@@ -96,6 +96,10 @@ def get_portfolio():
             day_change_pct = rt['change_pct']
             name = rt['name']
             
+            # Override name if found in A-Share Map (CSV source of truth)
+            if symbol.isdigit() and symbol in portfolio_service.a_share_map:
+                name = portfolio_service.a_share_map[symbol]
+            
             # Determine Currency
             is_us = not symbol.isdigit()
             currency = 'USD' if is_us else 'CNY'
