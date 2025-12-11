@@ -126,20 +126,37 @@ class PortfolioService:
         print(f"[Info] Final A-Share map size: {len(self.a_share_map)}")
 
     def _load_from_supabase_metadata(self) -> int:
-        """Fetch stock metadata from Supabase table. Returns count loaded."""
+        """Fetch stock metadata from Supabase table with pagination. Returns count loaded."""
         count = 0
+        offset = 0
+        batch_size = 1000
+        
+        print("[Info] Starting Supabase metadata fetch...")
         try:
-            # Fetch large batch
-            response = self.supabase.table("stock_metadata").select("symbol,name").limit(6000).execute()
-            data = response.data
-            
-            if data:
+            while True:
+                # Range is inclusive start, inclusive end
+                response = self.supabase.table("stock_metadata").select("symbol,name").range(offset, offset + batch_size - 1).execute()
+                data = response.data
+                
+                if not data:
+                    break
+                
+                batch_count = 0
                 for row in data:
                     s = row.get('symbol')
                     n = row.get('name')
                     if s and n:
                         self.a_share_map[s] = n
-                        count += 1
+                        batch_count += 1
+                
+                count += batch_count
+                offset += batch_size
+                
+                # If we got less than batch_size, we are done
+                if len(data) < batch_size:
+                    break
+                    
+            print(f"[Success] Fully loaded {count} names from Supabase.")
         except Exception as e:
             print(f"[Error] Failed to load from Supabase: {e}")
             # Do not re-raise, let fallback handle it
