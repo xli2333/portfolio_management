@@ -852,12 +852,28 @@ def _generate_pdf_report(analyzer, pdf_path: str, chart_png_path: str):
 #             _generate_chart_png(analyzer, chart_path)
 #             _generate_pdf_report(analyzer, pdf_path, chart_path)
 
-#             # Read file into memory to serve it
-#             return send_file(pdf_path, as_attachment=True, download_name=f"{base}_report.pdf")
-#         except Exception as e:
-#             import traceback
-#             traceback.print_exc()
-#             return jsonify({'error': f'PDF Generation Error: {str(e)}'}), 500
+            # Read file into memory to serve it
+            return send_file(pdf_path, as_attachment=True, download_name=f"{base}_report.pdf")
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': f'PDF Generation Error: {str(e)}'}), 500
+
+
+@app.route('/api/debug/ashare_map')
+def debug_ashare_map():
+    """Debug endpoint to check if A-share map is loaded."""
+    try:
+        count = len(portfolio_service.a_share_map)
+        sample = dict(list(portfolio_service.a_share_map.items())[:5])
+        return jsonify({
+            'status': 'ok',
+            'count': count,
+            'sample': sample,
+            'service_initialized': True
+        })
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 if __name__ == '__main__':

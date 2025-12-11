@@ -64,32 +64,56 @@ class PortfolioService:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         csv_path = os.path.join(base_dir, "A share names.csv")
         
+        print(f"[Info] Loading A-Share names from: {csv_path}")
+        
         if os.path.exists(csv_path):
             try:
-                import csv
-                # Try UTF-8 first
+                # 1. Try UTF-8-SIG (Handles BOM automatically, common in Excel CSVs)
+                loaded_count = 0
                 try:
-                    with open(csv_path, mode='r', encoding='utf-8') as f:
+                    with open(csv_path, mode='r', encoding='utf-8-sig') as f:
                         reader = csv.DictReader(f)
+                        # Normalize headers (strip whitespace)
+                        if reader.fieldnames:
+                            reader.fieldnames = [name.strip() for name in reader.fieldnames]
+                            
                         for row in reader:
                             # 证券代码, 证券名称
                             raw_code = row.get('证券代码')
                             name = row.get('证券名称')
+                            
                             if raw_code and name:
-                                code = raw_code.split('.')[0]
-                                self.a_share_map[code] = name
+                                code = raw_code.strip().split('.')[0]
+                                self.a_share_map[code] = name.strip()
+                                loaded_count += 1
+                                
+                    print(f"[Success] Loaded {loaded_count} A-share names (UTF-8-SIG).")
+                    if loaded_count > 0:
+                        first_key = list(self.a_share_map.keys())[0]
+                        print(f"[Debug] Sample: {first_key} -> {self.a_share_map[first_key]}")
+
                 except UnicodeDecodeError:
-                     # Try GBK
+                     # 2. Fallback to GBK
+                     print("[Warn] UTF-8-SIG failed, trying GBK...")
                      with open(csv_path, mode='r', encoding='gbk') as f:
                         reader = csv.DictReader(f)
+                        if reader.fieldnames:
+                            reader.fieldnames = [name.strip() for name in reader.fieldnames]
+
                         for row in reader:
                             raw_code = row.get('证券代码')
                             name = row.get('证券名称')
                             if raw_code and name:
-                                code = raw_code.split('.')[0]
-                                self.a_share_map[code] = name
+                                code = raw_code.strip().split('.')[0]
+                                self.a_share_map[code] = name.strip()
+                                loaded_count += 1
+                     print(f"[Success] Loaded {loaded_count} A-share names (GBK).")
+
             except Exception as e:
                 logger.error(f"Failed to load A share names: {e}")
+                print(f"[Error] Failed to load A share names: {e}")
+        else:
+            print(f"[Error] CSV file not found at: {csv_path}")
 
     def _init_local_storage(self):
         """Initialize local JSON file if it doesn't exist."""
