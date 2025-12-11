@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import base64
+import csv  # Standard library import
 # import requests # No longer needed
 from datetime import datetime
 from supabase import create_client, Client
