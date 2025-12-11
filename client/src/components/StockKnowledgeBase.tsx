@@ -15,6 +15,7 @@ interface Document {
     created_at: string;
     file_size: number;
     type: string;
+    is_pinned?: boolean; // Added for pinning feature
 }
 
 interface Message {
@@ -84,6 +85,30 @@ export function StockKnowledgeBase({ symbol, userId, onBack }: StockKnowledgeBas
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+    };
+
+    const handleTogglePin = async (docId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            const res = await fetch(`${apiBase}/api/knowledge/toggle_pin`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-ID': userId
+                },
+                body: JSON.stringify({ doc_id: docId })
+            });
+            if (!res.ok) throw new Error('Failed to toggle pin status');
+            const data = await res.json();
+            setDocuments(prevDocs =>
+                prevDocs.map(doc =>
+                    doc.id === docId ? { ...doc, is_pinned: data.is_pinned } : doc
+                )
+            );
+        } catch (err) {
+            console.error('Error toggling pin status:', err);
+            alert('切换置顶状态失败');
+        }
     };
 
     const fetchDocuments = async () => {
@@ -372,6 +397,13 @@ ${data.file_record.filename}\
                                             </div>
                                         </div>
                                         <div className="flex gap-1">
+                                            <button 
+                                                onClick={(e) => handleTogglePin(doc.id, e)}
+                                                className={cn("p-1 hover:text-black transition-colors", isSelected ? (doc.is_pinned ? "text-neon-dark hover:text-white" : "text-gray-400 hover:text-neon-dark") : (doc.is_pinned ? "text-neon-dark hover:text-black" : "text-gray-300"))}
+                                                title={doc.is_pinned ? "取消置顶" : "置顶文档"}
+                                            >
+                                                {doc.is_pinned ? <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-pin"><path d="M12 17v5"/><path d="M15 9.4L18.35 6.65a1 1 0 0 0 0-1.41l-2.19-2.19a1 1 0 0 0-1.41 0L12 4.6 8.65 1.25a1 1 0 0 0-1.41 0L5.05 3.44a1 1 0 0 0 0 1.41L8 8l-2 3-3 1v3h3l2 3h3z"/></svg> : <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-pin"><path d="M12 17v5"/><path d="M15 9.4L18.35 6.65a1 1 0 0 0 0-1.41l-2.19-2.19a1 1 0 0 0-1.41 0L12 4.6 8.65 1.25a1 1 0 0 0-1.41 0L5.05 3.44a1 1 0 0 0 0 1.41L8 8l-2 3-3 1v3h3l2 3h3z"/></svg>}
+                                            </button>
                                             <button 
                                                 onClick={(e) => handleDownload(doc.id, doc.filename, e)}
                                                 className={cn("p-1 hover:text-black transition-colors", isSelected ? "text-gray-400 hover:text-white" : "text-gray-300")}

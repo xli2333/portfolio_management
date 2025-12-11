@@ -283,12 +283,63 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
     const [addError, setAddError] = useState('');
     const [isAdding, setIsAdding] = useState(false);
 
+    // Sorting State
+    const [sortField, setSortField] = useState<keyof Holding | null>('market_value');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // Default to descending market value
+
     const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
     // Sync currentTab with initialTab when it changes
     useEffect(() => {
         setCurrentTab(initialTab);
     }, [initialTab]);
+
+    // Helper to sort holdings
+    const sortHoldings = (currentHoldings: Holding[]) => {
+        if (!sortField) return currentHoldings;
+
+        return [...currentHoldings].sort((a, b) => {
+            let valA: any;
+            let valB: any;
+
+            if (sortField === 'market_value') {
+                valA = a.market_value;
+                valB = b.market_value;
+            } else if (sortField === 'unrealized_pl_pct') {
+                valA = a.unrealized_pl_pct;
+                valB = b.unrealized_pl_pct;
+            } else if (sortField === 'name') {
+                valA = a.name;
+                valB = b.name;
+            } else if (sortField === 'symbol') {
+                valA = a.symbol;
+                valB = b.symbol;
+            } else {
+                // Fallback for other potential fields, though not explicitly requested yet
+                valA = a[sortField];
+                valB = b[sortField];
+            }
+
+            if (typeof valA === 'string' && typeof valB === 'string') {
+                // For Chinese names, use localeCompare
+                return sortOrder === 'asc' ? valA.localeCompare(valB, 'zh-CN') : valB.localeCompare(valA, 'zh-CN');
+            } else if (typeof valA === 'number' && typeof valB === 'number') {
+                return sortOrder === 'asc' ? valA - valB : valB - valA;
+            }
+            return 0;
+        });
+    };
+
+    const handleSort = (field: keyof Holding) => {
+        if (sortField === field) {
+            // If clicking the same field, toggle order
+            setSortOrder(prevOrder => (prevOrder === 'asc' ? 'desc' : 'asc'));
+        } else {
+            // If clicking a new field, set it as current and default to ascending
+            setSortField(field);
+            setSortOrder('asc');
+        }
+    };
 
     const fetchPortfolio = async () => {
         setLoading(true);
@@ -509,13 +560,28 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                     {/* Holdings Table */}
                     <div className="border-t-4 border-black">
                         <div className="grid grid-cols-12 border-b-2 border-black py-4 text-sm font-bold font-serif text-gray-500">
-                            <div className="col-span-2 pl-2">资产名称</div>
+                            <div 
+                                className="col-span-2 pl-2 cursor-pointer hover:text-black transition-colors flex items-center gap-1"
+                                onClick={() => handleSort('name')}
+                            >
+                                资产名称 {sortField === 'name' && (sortOrder === 'asc' ? '▲' : '▼')}
+                            </div>
                             <div className="col-span-2">简介</div>
                             <div className="col-span-1 text-right">成本</div>
                             <div className="col-span-2 text-right">现价</div>
                             <div className="col-span-1 text-right">数量</div>
-                            <div className="col-span-2 text-right">市值</div>
-                            <div className="col-span-1 text-right">盈亏</div>
+                            <div 
+                                className="col-span-2 text-right cursor-pointer hover:text-black transition-colors flex items-center justify-end gap-1"
+                                onClick={() => handleSort('market_value')}
+                            >
+                                市值 {sortField === 'market_value' && (sortOrder === 'asc' ? '▲' : '▼')}
+                            </div>
+                            <div 
+                                className="col-span-1 text-right cursor-pointer hover:text-black transition-colors flex items-center justify-end gap-1"
+                                onClick={() => handleSort('unrealized_pl_pct')}
+                            >
+                                盈亏 {sortField === 'unrealized_pl_pct' && (sortOrder === 'asc' ? '▲' : '▼')}
+                            </div>
                             <div className="col-span-1 text-center">操作</div>
                         </div>
                         
@@ -524,7 +590,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                         ) : holdings.length === 0 ? (
                             <div className="py-12 text-center text-gray-400 font-mono">暂无持仓，请点击上方添加。</div>
                         ) : (
-                            holdings.map((h) => (
+                            sortHoldings(holdings).map((h) => (
                                 <div 
                                     key={h.symbol} 
                                     className="grid grid-cols-12 border-b border-gray-200 py-5 items-center hover:bg-gray-50 group transition-colors"

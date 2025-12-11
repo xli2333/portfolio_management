@@ -452,6 +452,25 @@ def delete_document():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/knowledge/toggle_pin', methods=['POST'])
+def toggle_document_pin():
+    try:
+        user_id = request.headers.get('User-ID', 'anonymous')
+        data = request.get_json(force=True)
+        doc_id = data.get('doc_id')
+
+        if not doc_id:
+            return jsonify({'error': 'Missing doc_id'}), 400
+
+        result = knowledge_service.toggle_pin_status(doc_id, user_id)
+        if result.get('success'):
+            return jsonify(result)
+        else:
+            return jsonify({'error': result.get('error', 'Failed to toggle pin status')}), 500
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/api/knowledge/save_chat', methods=['POST'])
 def save_chat_to_knowledge():
     try:

@@ -45,7 +45,11 @@ BEGIN;
       USING (auth.uid() = user_id);
 COMMIT;
 
--- 5. [性能优化] 补充索引
+-- 5. [功能增强] 为知识库文档添加“固定”状态
+-- 说明：允许用户将特定知识库条目标记为“固定”，即使持仓清空也保留。
+ALTER TABLE public.knowledge_documents ADD COLUMN IF NOT EXISTS is_pinned BOOLEAN DEFAULT FALSE;
+
+-- 6. [性能优化] 补充索引
 -- 说明：加快对 MACRO/STRATEGY 标签的检索速度。
 CREATE INDEX IF NOT EXISTS idx_knowledge_symbol ON public.knowledge_documents(symbol);
 CREATE INDEX IF NOT EXISTS idx_knowledge_user_id ON public.knowledge_documents(user_id);

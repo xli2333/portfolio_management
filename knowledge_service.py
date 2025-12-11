@@ -111,7 +111,8 @@ class KnowledgeService:
                     "filename": safe_filename,
                     "file_size": file_size,
                     "created_at": record["created_at"],
-                    "file_type": doc_type 
+                    "file_type": doc_type, 
+                    "is_pinned": False # New field, default to not pinned
                 }
                 
                 if not user_id or user_id == 'anonymous':
@@ -205,9 +206,16 @@ class KnowledgeService:
                 return ""
 
     def delete_document(self, doc_id: str) -> bool:
-        """Delete document metadata and file."""
+        """Delete document metadata and file, unless it's pinned."""
         doc = self.get_document_metadata(doc_id)
         if not doc: return False
+
+        # If document is pinned, prevent deletion.
+        # This check is primarily for scenarios where an external process
+        # might try to clean up documents for unheld stocks.
+        if doc.get("is_pinned", False):
+            logger.info(f"Document {doc_id} is pinned and cannot be deleted automatically.")
+            return False
 
         # 2. Delete file
         if "file_path" in doc and os.path.exists(doc["file_path"]):
@@ -230,6 +238,46 @@ class KnowledgeService:
                 pass
         
         return True
+
+    def toggle_pin_status(self, doc_id: str, user_id: str) -> dict:
+        """Toggle the is_pinned status of a document."""
+        if self.use_supabase:
+            try:
+                # Fetch current status
+                res = self.supabase.table(self.table_name).select("is_pinned").eq("id", doc_id).eq("user_id", user_id).single().execute()
+                current_pinned_status = res.data["is_pinned"]
+                new_pinned_status = not current_pinned_status
+
+                # Update status
+                update_res = self.supabase.table(self.table_name).update({"is_pinned": new_pinned_status}).eq("id", doc_id).eq("user_id", user_id).execute()
+                return {"id": doc_id, "is_pinned": new_pinned_status, "success": True}
+            except Exception as e:
+                logger.error(f"Supabase toggle pin status failed for {doc_id}: {e}")
+                return {"error": str(e), "success": False}
+        else:
+            # Local JSON update
+            try:
+                with open(self.local_meta_file, 'r', encoding='utf-8') as f:
+                    docs = json.load(f)
+                
+                found = False
+                for doc in docs:
+                    if doc["id"] == doc_id and doc.get("user_id") == user_id:
+                        doc["is_pinned"] = not doc.get("is_pinned", False)
+                        found = True
+                        break
+                
+                if found:
+                    with open(self.local_meta_file, 'w', encoding='utf-8') as f:
+                        json.dump(docs, f, indent=2)
+                    # Find the updated doc to return its status
+                    updated_doc = next((d for d in docs if d["id"] == doc_id), None)
+                    return {"id": doc_id, "is_pinned": updated_doc.get("is_pinned", False), "success": True} if updated_doc else {"error": "Document not found locally after update.", "success": False}
+                else:
+                    return {"error": "Document not found locally or user mismatch.", "success": False}
+            except Exception as e:
+                logger.error(f"Local toggle pin status failed for {doc_id}: {e}")
+                return {"error": str(e), "success": False}
 
     def get_documents_content(self, file_ids: list) -> str:
         """Combine content of multiple documents."""
