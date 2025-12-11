@@ -107,7 +107,7 @@ function EditableCell({
     return (
         <div 
             onClick={(e) => { e.stopPropagation(); setEditing(true); }}
-            className={cn("cursor-pointer border-b border-dashed border-gray-300 hover:border-black hover:bg-gray-100 transition-colors px-1 h-8 flex items-center justify-end", className)}
+            className={cn("inline-flex items-center justify-end cursor-pointer border-b border-dashed border-gray-300 hover:border-black hover:bg-gray-100 transition-colors px-1 h-8", className)}
             title="Click to edit"
         >
             {format(value)}
@@ -568,13 +568,15 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                     {/* Holdings Table */}
                     <div className="border-t-4 border-black">
                         <div className="grid grid-cols-12 border-b-2 border-black py-4 text-sm font-bold font-serif text-gray-500">
+                            {/* Asset Name: 2 cols */}
                             <div 
-                                className="col-span-3 pl-2 cursor-pointer hover:text-black transition-colors flex items-center gap-1"
+                                className="col-span-2 pl-2 cursor-pointer hover:text-black transition-colors flex items-center gap-1"
                                 onClick={() => handleSort('name')}
                             >
                                 资产名称 {sortField === 'name' && (sortOrder === 'asc' ? '▲' : '▼')}
                             </div>
-                            <div className="col-span-1">简介</div>
+                            {/* Summary: 2 cols */}
+                            <div className="col-span-2">简介</div>
                             <div className="col-span-1 text-right">成本</div>
                             <div className="col-span-1 text-right">现价</div>
                             <div 
@@ -609,16 +611,23 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                                     key={h.symbol} 
                                     className="grid grid-cols-12 border-b border-gray-200 py-5 items-center hover:bg-gray-50 group transition-colors"
                                 >
+                                    {/* Asset Name: 2 cols */}
                                     <div 
                                         onClick={() => onNavigate(h.symbol)}
-                                        className="col-span-3 pl-2 cursor-pointer hover:underline decoration-2 underline-offset-4"
+                                        className="col-span-2 pl-2 cursor-pointer hover:underline decoration-2 underline-offset-4"
                                         title="点击查看详情"
                                     >
-                                        <div className="font-black text-xl tracking-tight leading-none font-mono text-black">{h.symbol}</div>
+                                        <div className="font-black text-xl tracking-tight leading-none font-mono text-black flex items-center gap-2">
+                                            {h.symbol}
+                                        </div>
                                         <div className="text-xs text-gray-500 mt-1 font-serif truncate">{h.name}</div>
                                     </div>
-                                    <div className="col-span-1 pr-2">
-                                        <CompanySummary symbol={h.symbol} />
+                                    
+                                    {/* Summary: 2 cols (Compact) */}
+                                    <div className="col-span-2 pr-2 overflow-hidden">
+                                         <div className="text-[10px] text-gray-400 font-serif truncate" title="点击查看详情">
+                                            ...
+                                         </div>
                                     </div>
                                     <div className="col-span-1 text-right font-mono text-lg text-gray-600">
                                         <EditableCell 
