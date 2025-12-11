@@ -64,7 +64,7 @@ class PortfolioService:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         csv_path = os.path.join(base_dir, "A share names.csv")
         
-        print(f"[Info] Loading A-Share names from: {csv_path}")
+        # print(f"[Info] Loading A-Share names from: {csv_path}")
         
         if os.path.exists(csv_path):
             try:
@@ -88,9 +88,10 @@ class PortfolioService:
                                 loaded_count += 1
                                 
                     print(f"[Success] Loaded {loaded_count} A-share names (UTF-8-SIG).")
-                    if loaded_count > 0:
-                        first_key = list(self.a_share_map.keys())[0]
-                        print(f"[Debug] Sample: {first_key} -> {self.a_share_map[first_key]}")
+                    # if loaded_count > 0:
+                        # first_key = list(self.a_share_map.keys())[0]
+                        # Safe print without potential unicode issues in logs
+                        # print(f"[Debug] First key loaded: {first_key}")
 
                 except UnicodeDecodeError:
                      # 2. Fallback to GBK
@@ -111,7 +112,7 @@ class PortfolioService:
 
             except Exception as e:
                 logger.error(f"Failed to load A share names: {e}")
-                print(f"[Error] Failed to load A share names: {e}")
+                # print(f"[Error] Failed to load A share names: {e}")
         else:
             print(f"[Error] CSV file not found at: {csv_path}")
 
