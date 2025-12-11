@@ -57,51 +57,30 @@ class PortfolioService:
         
         # Load A Share Name Mapping
         self.a_share_map = {}
-        self._load_a_share_names()
+        try:
+            self._load_a_share_names()
+        except Exception as e:
+            # CRITICAL: Do not let name loading crash the entire application
+            # Log error but continue boot
+            print(f"[Critical Warning] Failed to load share names: {e}")
+            logger.error(f"Failed to load share names: {e}")
 
     def _load_a_share_names(self):
-        """Load A-share name mapping from CSV."""
-        # Use absolute path to ensure file is found in cloud environments
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        csv_path = os.path.join(base_dir, "A share names.csv")
+        """Load A-share name mapping from CSV or Supabase (Fallback)."""
+        loaded_count = 0
         
-        # print(f"[Info] Loading A-Share names from: {csv_path}")
-        
-        if os.path.exists(csv_path):
-            try:
-                # 1. Try UTF-8-SIG (Handles BOM automatically, common in Excel CSVs)
-                loaded_count = 0
+        # 1. Try CSV
+        try:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            csv_path = os.path.join(base_dir, "A share names.csv")
+            
+            if os.path.exists(csv_path):
                 try:
                     with open(csv_path, mode='r', encoding='utf-8-sig') as f:
                         reader = csv.DictReader(f)
-                        # Normalize headers (strip whitespace)
                         if reader.fieldnames:
                             reader.fieldnames = [name.strip() for name in reader.fieldnames]
                             
-                        for row in reader:
-                            # 证券代码, 证券名称
-                            raw_code = row.get('证券代码')
-                            name = row.get('证券名称')
-                            
-                            if raw_code and name:
-                                code = raw_code.strip().split('.')[0]
-                                self.a_share_map[code] = name.strip()
-                                loaded_count += 1
-                                
-                    print(f"[Success] Loaded {loaded_count} A-share names (UTF-8-SIG).")
-                    # if loaded_count > 0:
-                        # first_key = list(self.a_share_map.keys())[0]
-                        # Safe print without potential unicode issues in logs
-                        # print(f"[Debug] First key loaded: {first_key}")
-
-                except UnicodeDecodeError:
-                     # 2. Fallback to GBK
-                     print("[Warn] UTF-8-SIG failed, trying GBK...")
-                     with open(csv_path, mode='r', encoding='gbk') as f:
-                        reader = csv.DictReader(f)
-                        if reader.fieldnames:
-                            reader.fieldnames = [name.strip() for name in reader.fieldnames]
-
                         for row in reader:
                             raw_code = row.get('证券代码')
                             name = row.get('证券名称')
@@ -109,13 +88,58 @@ class PortfolioService:
                                 code = raw_code.strip().split('.')[0]
                                 self.a_share_map[code] = name.strip()
                                 loaded_count += 1
-                     print(f"[Success] Loaded {loaded_count} A-share names (GBK).")
+                except Exception as csv_e:
+                    print(f"[Warn] CSV load failed: {csv_e}")
+                    # Fallback to GBK
+                    try:
+                        with open(csv_path, mode='r', encoding='gbk') as f:
+                            reader = csv.DictReader(f)
+                            if reader.fieldnames:
+                                reader.fieldnames = [name.strip() for name in reader.fieldnames]
+                            for row in reader:
+                                raw_code = row.get('证券代码')
+                                name = row.get('证券名称')
+                                if raw_code and name:
+                                    code = raw_code.strip().split('.')[0]
+                                    self.a_share_map[code] = name.strip()
+                                    loaded_count += 1
+                    except Exception as gbk_e:
+                        print(f"[Warn] CSV GBK load failed: {gbk_e}")
+        except Exception as e:
+            print(f"[Warn] File system error: {e}")
 
-            except Exception as e:
-                logger.error(f"Failed to load A share names: {e}")
-                # print(f"[Error] Failed to load A share names: {e}")
+        # 2. Fallback to Supabase if CSV yielded nothing
+        if loaded_count == 0 and self.use_supabase:
+            print("[Info] No local CSV data found. Attempting Supabase fallback...")
+            self._load_from_supabase_metadata()
         else:
-            print(f"[Error] CSV file not found at: {csv_path}")
+            print(f"[Info] Loaded {loaded_count} names from local CSV.")
+
+    def _load_from_supabase_metadata(self):
+        """Fetch stock metadata from Supabase table."""
+        try:
+            # Fetch all rows (Supabase default limit is usually 1000, need to paginate or request more)
+            # For simplicity, we request a large range.
+            # Note: A real prod app would paginate. 5000 rows might hit limits.
+            # Let's try fetching just what we need? No, we need the map.
+            # We'll try to fetch 10000 rows.
+            response = self.supabase.table("stock_metadata").select("symbol,name").limit(6000).execute()
+            data = response.data
+            
+            if data:
+                count = 0
+                for row in data:
+                    s = row.get('symbol')
+                    n = row.get('name')
+                    if s and n:
+                        self.a_share_map[s] = n
+                        count += 1
+                print(f"[Success] Loaded {count} names from Supabase.")
+            else:
+                print("[Warn] Supabase stock_metadata table is empty.")
+        except Exception as e:
+            print(f"[Error] Failed to load from Supabase: {e}")
+
 
     def _init_local_storage(self):
         """Initialize local JSON file if it doesn't exist."""
