@@ -380,6 +380,24 @@ def remove_portfolio_item():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/portfolio/toggle_pin', methods=['POST'])
+def toggle_portfolio_pin():
+    try:
+        user_id = request.headers.get('User-ID', 'anonymous')
+        data = request.get_json(force=True)
+        symbol = data.get('symbol')
+        
+        if not symbol:
+             return jsonify({'error': 'Missing symbol'}), 400
+
+        result = portfolio_service.toggle_stock_pin(user_id, symbol)
+        if result.get('status') == 'error':
+             return jsonify({'error': result.get('msg')}), 500
+             
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # --- Knowledge Base APIs ---
 
 @app.route('/api/knowledge/upload', methods=['POST'])

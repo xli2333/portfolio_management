@@ -506,7 +506,12 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
             </div>
 
             {currentTab === 'advisor' ? (
-                <AIAdvisorView holdings={holdings} onNavigate={onNavigateKnowledgeBase} />
+                <AIAdvisorView 
+                    holdings={holdings} 
+                    onNavigate={onNavigateKnowledgeBase} 
+                    onRefresh={fetchPortfolio}
+                    userId={userId}
+                />
             ) : (
                 <>
                     {/* Header / Overview Card */}

@@ -177,21 +177,84 @@ class PortfolioService:
                 json.dump({}, f)
 
     def get_portfolio(self, user_id):
-        """Retrieve all holdings for a specific user."""
+        """Retrieve all holdings for a specific user, merging with pinned stocks."""
+        holdings = []
         if self.use_supabase:
             try:
+                # 1. Fetch actual holdings
                 response = self.supabase.table("holdings").select("*").eq("user_id", user_id).execute()
-                return response.data
+                holdings = response.data or []
+                
+                # 2. Fetch pinned stocks
+                pinned_res = self.supabase.table("pinned_stocks").select("symbol").eq("user_id", user_id).execute()
+                pinned_symbols = {item['symbol'] for item in pinned_res.data} if pinned_res.data else set()
+
+                # 3. Merge
+                # Map existing holdings by symbol
+                holdings_map = {h['symbol']: h for h in holdings}
+                
+                final_list = []
+                
+                # Process holdings first
+                for h in holdings:
+                    h['is_pinned'] = h['symbol'] in pinned_symbols
+                    final_list.append(h)
+                
+                # Process pinned stocks that are NOT in holdings
+                for sym in pinned_symbols:
+                    if sym not in holdings_map:
+                        # Create a "virtual" holding for the pinned stock
+                        final_list.append({
+                            "user_id": user_id,
+                            "symbol": sym,
+                            "shares": 0,
+                            "cost_basis": 0.0,
+                            "updated_at": datetime.utcnow().isoformat(),
+                            "is_pinned": True,
+                            "name": self.a_share_map.get(sym, sym) # Try to resolve name
+                        })
+                
+                return final_list
+
             except Exception as e:
                 logger.error(f"Supabase read error: {e}")
                 return []
         else:
             try:
                 with open(self.local_file, 'r', encoding='utf-8') as f:
-                    return json.load(f)
+                    data = json.load(f)
+                    # Add default is_pinned for local mode compatibility
+                    for d in data:
+                        d['is_pinned'] = False
+                    return data
             except Exception as e:
                 logger.error(f"Local file read error: {e}")
                 return []
+
+    def toggle_stock_pin(self, user_id, symbol):
+        """Toggle the pinned status of a stock in the AI Advisor view."""
+        if not self.use_supabase:
+            return {"status": "error", "msg": "Pinning not supported in local mode"}
+
+        try:
+            # Check if exists
+            res = self.supabase.table("pinned_stocks").select("*").eq("user_id", user_id).eq("symbol", symbol).execute()
+            exists = len(res.data) > 0
+            
+            if exists:
+                # Unpin (Delete)
+                self.supabase.table("pinned_stocks").delete().eq("user_id", user_id).eq("symbol", symbol).execute()
+                return {"status": "success", "is_pinned": False}
+            else:
+                # Pin (Insert)
+                self.supabase.table("pinned_stocks").insert({
+                    "user_id": user_id,
+                    "symbol": symbol
+                }).execute()
+                return {"status": "success", "is_pinned": True}
+        except Exception as e:
+            logger.error(f"Toggle pin failed: {e}")
+            return {"status": "error", "msg": str(e)}
 
     def add_stock(self, user_id, symbol, quantity, cost_basis):
         """Add a stock to the portfolio for a specific user."""
