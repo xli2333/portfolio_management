@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Upload, FileText, Bot, Trash2, Send, Paperclip, CheckSquare, Square, Download } from 'lucide-react';
+import { ArrowLeft, Upload, FileText, Bot, Trash2, Send, Paperclip, CheckSquare, Square, Download, Sparkles, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 
@@ -33,6 +33,13 @@ export function StockKnowledgeBase({ symbol, userId, onBack }: StockKnowledgeBas
     const [uploading, setUploading] = useState(false);
     const [generatingReport, setGeneratingReport] = useState(false);
     const [selectedMessageIndices, setSelectedMessageIndices] = useState<Set<number>>(new Set());
+
+    // Ultra Deep Report states
+    const [showUltraDeepModal, setShowUltraDeepModal] = useState(false);
+    const [geminiApiKey, setGeminiApiKey] = useState('');
+    const [customPrompt, setCustomPrompt] = useState('');
+    const [ultraDeepLoading, setUltraDeepLoading] = useState(false);
+    const [ultraDeepProgress, setUltraDeepProgress] = useState('');
     
     const fileInputRef = useRef<HTMLInputElement>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -213,7 +220,7 @@ export function StockKnowledgeBase({ symbol, userId, onBack }: StockKnowledgeBas
     const handleGenerateReport = async () => {
         if (generatingReport) return;
         setGeneratingReport(true);
-        
+
         // Add a temporary system message to show status
         const loadingMsg: Message = { role: 'model', text: '正在进行深度研究并生成报告，请稍候（可能需要1-2分钟）...' };
         const tempMessages = [...messages, loadingMsg];
@@ -222,7 +229,7 @@ export function StockKnowledgeBase({ symbol, userId, onBack }: StockKnowledgeBas
         try {
             const res = await fetch(`${apiBase}/api/agent/generate_report`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'User-ID': userId
                 },
@@ -240,14 +247,14 @@ export function StockKnowledgeBase({ symbol, userId, onBack }: StockKnowledgeBas
             let successText = `**深度研究报告已生成**\n\n已自动保存至左侧文档列表：\
 ${data.file_record.filename}\
 `;
-            
+
             successText += `\n\n您现在可以勾选这些报告并针对其内容进行提问。`;
 
-            const successMsg: Message = { 
-                role: 'model', 
+            const successMsg: Message = {
+                role: 'model',
                 text: successText
             };
-            
+
             // Remove the last loading message and add success message
             const finalMessages = [...messages, successMsg];
             setMessages(finalMessages);
@@ -259,6 +266,127 @@ ${data.file_record.filename}\
             setMessages([...messages, errorMsg]);
         } finally {
             setGeneratingReport(false);
+        }
+    };
+
+    const handleOpenUltraDeepModal = () => {
+        // Set default prompt based on symbol type
+        let defaultPrompt = '';
+        if (symbol === 'MACRO') {
+            defaultPrompt = '请分析2025年全球宏观经济形势，重点关注美联储货币政策、中国经济增长、地缘政治风险，并给出大类资产配置建议。';
+        } else if (symbol === 'STRATEGY') {
+            defaultPrompt = '请设计一个适合2025年市场环境的量化投资策略，包括因子选择、回测结果、风险管理方案。';
+        } else {
+            defaultPrompt = `请对${symbol}进行全面深度分析，包括公司基本面、竞争优势、财务质量、估值水平，并给出投资建议。`;
+        }
+        setCustomPrompt(defaultPrompt);
+        setShowUltraDeepModal(true);
+    };
+
+    const handleGenerateUltraDeepReport = async () => {
+        if (!geminiApiKey.trim()) {
+            alert('请输入您的 Gemini API Key');
+            return;
+        }
+        if (!customPrompt.trim()) {
+            alert('请输入研究主题');
+            return;
+        }
+
+        setUltraDeepLoading(true);
+        setShowUltraDeepModal(false);
+        setUltraDeepProgress('正在提交任务到 Google Deep Research...');
+
+        // Add initial loading message
+        const loadingMsg: Message = {
+            role: 'model',
+            text: '🚀 **顶级深度报告任务已提交**\n\n正在后台运行 Deep Research Agent。\n\n• 预计耗时：10-20 分钟\n• 您可以继续使用其他功能，报告生成后会自动出现。'
+        };
+        const tempMessages = [...messages, loadingMsg];
+        setMessages(tempMessages);
+
+        try {
+            // Determine mode
+            let mode = 'STOCK';
+            if (symbol === 'MACRO') mode = 'MACRO';
+            else if (symbol === 'STRATEGY') mode = 'STRATEGY';
+
+            // 1. Start Task
+            const res = await fetch(`${apiBase}/api/agent/generate_ultra_deep_report`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-ID': userId
+                },
+                body: JSON.stringify({
+                    symbol: symbol,
+                    mode: mode,
+                    custom_prompt: customPrompt,
+                    gemini_api_key: geminiApiKey
+                })
+            });
+
+            const startData = await res.json();
+            if (!res.ok || startData.error) {
+                throw new Error(startData.error || 'Failed to start task');
+            }
+
+            const taskId = startData.task_id;
+            
+            // 2. Poll Status
+            const pollInterval = setInterval(async () => {
+                try {
+                    const statusRes = await fetch(`${apiBase}/api/agent/task_status/${taskId}`);
+                    const statusData = await statusRes.json();
+                    
+                    if (statusData.status === 'completed') {
+                        clearInterval(pollInterval);
+                        setUltraDeepLoading(false);
+                        
+                        // Success Message
+                        const result = statusData.result;
+                        let successText = `**✓ 顶级深度报告已完成**\n\n已自动保存至左侧文档列表：\
+${result.file_record.filename}\
+\n\n报告长度：${Math.round(result.report_length / 1000)}K 字符\
+\n\n这是使用 Google 官方 Deep Research API 生成的超级深度报告。`;
+
+                        const successMsg: Message = {
+                            role: 'model',
+                            text: successText
+                        };
+
+                        setMessages(prev => [...prev, successMsg]);
+                        fetchDocuments(); // Refresh list
+
+                    } else if (statusData.status === 'failed') {
+                        clearInterval(pollInterval);
+                        setUltraDeepLoading(false);
+                        throw new Error(statusData.error || 'Unknown error');
+                        
+                    } else {
+                        // Still processing
+                        setUltraDeepProgress(statusData.progress || '正在进行深度研究...');
+                    }
+                } catch (err: any) {
+                    // Handle polling errors (maybe retry or stop)
+                    console.error("Polling error:", err);
+                    // Don't clear interval immediately on network blip, but if error persists...
+                    // For simplicity, we keep polling unless fatal
+                    if (err.message.includes('Task not found')) {
+                         clearInterval(pollInterval);
+                         setUltraDeepLoading(false);
+                         alert('任务丢失，请重试');
+                    }
+                }
+            }, 5000); // Poll every 5 seconds
+
+        } catch (e: any) {
+            setUltraDeepLoading(false);
+            const errorMsg: Message = {
+                role: 'model',
+                text: `❌ **任务启动失败**\n\n错误：${e.message}`
+            };
+            setMessages(prev => [...prev, errorMsg]);
         }
     };
 
@@ -444,7 +572,7 @@ ${data.file_record.filename}\
                                 </button>
                             )}
 
-                            <button 
+                            <button
                                 onClick={() => handleGenerateReport()}
                                 disabled={generatingReport}
                                 className={cn(
@@ -454,7 +582,21 @@ ${data.file_record.filename}\
                             >
                                 {generatingReport ? "生成中..." : "生成深度研报"}
                             </button>
-                            <select 
+
+                            <button
+                                onClick={handleOpenUltraDeepModal}
+                                disabled={ultraDeepLoading}
+                                className={cn(
+                                    "text-xs font-black uppercase tracking-wider px-3 py-1 transition-colors flex items-center gap-1",
+                                    ultraDeepLoading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-black text-white hover:bg-gray-800 border-2 border-black"
+                                )}
+                                title="使用 Google 官方 Deep Research API 生成超级深度报告（10-20分钟）"
+                            >
+                                <Sparkles size={12} />
+                                {ultraDeepLoading ? "生成中..." : "顶级深度报告"}
+                            </button>
+
+                            <select
                                 value={model}
                                 onChange={(e) => setModel(e.target.value)}
                                 className="bg-white border-2 border-gray-200 text-xs font-bold px-2 py-1 outline-none cursor-pointer hover:border-black transition-colors"
@@ -551,6 +693,114 @@ ${data.file_record.filename}\
                     </div>
                 </div>
             </div>
+
+            {/* Ultra Deep Report Modal */}
+            {showUltraDeepModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white border-4 border-black max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                        {/* Header */}
+                        <div className="bg-black text-white p-6 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <Sparkles size={24} />
+                                <h2 className="text-2xl font-black font-serif">顶级深度报告</h2>
+                            </div>
+                            <button
+                                onClick={() => setShowUltraDeepModal(false)}
+                                className="hover:bg-white hover:text-black transition-colors p-2 rounded"
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="p-6 space-y-6">
+                            {/* Info Banner */}
+                            <div className="bg-neon border-2 border-black p-4">
+                                <p className="text-sm font-bold font-mono">
+                                    ⚡ 使用 Google 官方 Deep Research API 生成超级深度报告
+                                </p>
+                                <ul className="mt-2 text-xs font-mono space-y-1 opacity-80">
+                                    <li>• 预计耗时：10-20 分钟</li>
+                                    <li>• 报告长度：5000+ 字，包含大量数据引用</li>
+                                    <li>• 需要您提供自己的 Gemini API Key</li>
+                                </ul>
+                            </div>
+
+                            {/* API Key Input */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold font-mono">
+                                    Gemini API Key *
+                                </label>
+                                <input
+                                    type="password"
+                                    value={geminiApiKey}
+                                    onChange={(e) => setGeminiApiKey(e.target.value)}
+                                    placeholder="AIzaSy..."
+                                    className="w-full bg-gray-50 border-2 border-gray-300 px-4 py-3 text-sm focus:border-black focus:ring-0 outline-none transition-colors font-mono"
+                                />
+                                <p className="text-xs text-gray-500 font-mono">
+                                    在 <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" className="underline hover:text-black">Google AI Studio</a> 获取 API Key
+                                </p>
+                            </div>
+
+                            {/* Custom Prompt Input */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold font-mono">
+                                    研究主题 *
+                                </label>
+                                <textarea
+                                    value={customPrompt}
+                                    onChange={(e) => setCustomPrompt(e.target.value)}
+                                    rows={8}
+                                    placeholder="请输入您想深度研究的主题和关注点..."
+                                    className="w-full bg-gray-50 border-2 border-gray-300 px-4 py-3 text-sm focus:border-black focus:ring-0 outline-none transition-colors font-medium resize-none"
+                                />
+                                <p className="text-xs text-gray-500 font-mono">
+                                    提示：越详细的研究问题，生成的报告质量越高
+                                </p>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3 pt-4">
+                                <button
+                                    onClick={handleGenerateUltraDeepReport}
+                                    className="flex-1 bg-black text-white py-3 px-6 font-black uppercase tracking-wider hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Sparkles size={16} />
+                                    开始生成
+                                </button>
+                                <button
+                                    onClick={() => setShowUltraDeepModal(false)}
+                                    className="px-6 py-3 border-2 border-black font-black uppercase tracking-wider hover:bg-gray-100 transition-colors"
+                                >
+                                    取消
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Ultra Deep Loading Overlay */}
+            {ultraDeepLoading && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="bg-white border-4 border-neon p-8 max-w-md shadow-[8px_8px_0px_0px_rgba(255,242,0,1)] animate-pulse">
+                        <div className="flex items-center gap-4 mb-4">
+                            <Sparkles size={32} className="text-black animate-spin" />
+                            <h3 className="text-xl font-black font-serif">Deep Research 进行中...</h3>
+                        </div>
+                        <p className="text-sm font-mono text-gray-600 mb-4">
+                            {ultraDeepProgress || '正在与 Google AI 通信...'}
+                        </p>
+                        <div className="bg-gray-200 h-2 overflow-hidden">
+                            <div className="bg-black h-full w-1/2 animate-pulse"></div>
+                        </div>
+                        <p className="text-xs text-gray-500 font-mono mt-4 text-center">
+                            预计需要 10-20 分钟，请耐心等待
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -556,6 +556,68 @@ def generate_agent_report():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/agent/generate_ultra_deep_report', methods=['POST'])
+def generate_ultra_deep_report():
+    """
+    Start async ultra-deep research task
+    Returns: { "status": "pending", "task_id": "..." }
+    """
+    try:
+        from deep_research_agent import DeepResearchAgent
+        from task_manager import TaskManager
+        import threading
+
+        data = request.get_json(force=True)
+        symbol = data.get('symbol')
+        mode = data.get('mode')
+        custom_prompt = data.get('custom_prompt')
+        gemini_api_key = data.get('gemini_api_key')
+
+        # Validation
+        if not symbol or not mode or not custom_prompt or not gemini_api_key:
+            return jsonify({'error': 'Missing required parameters'}), 400
+
+        # Create Task Record
+        tm = TaskManager()
+        task_id = tm.create_task(symbol, mode)
+
+        # Initialize agent
+        agent = DeepResearchAgent(api_key=gemini_api_key)
+
+        # Start Background Thread
+        # We pass knowledge_service instance to thread
+        thread = threading.Thread(
+            target=agent.run_async_task,
+            args=(task_id, mode, custom_prompt, symbol if mode == 'STOCK' else None, knowledge_service)
+        )
+        thread.daemon = True # Ensure thread doesn't block shutdown
+        thread.start()
+
+        return jsonify({
+            'status': 'pending',
+            'task_id': task_id,
+            'message': 'Deep Research task started'
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': f'Failed to start task: {str(e)}'}), 500
+
+@app.route('/api/agent/task_status/<task_id>', methods=['GET'])
+def get_task_status(task_id):
+    try:
+        from task_manager import TaskManager
+        tm = TaskManager()
+        task = tm.get_task(task_id)
+        
+        if not task:
+            return jsonify({'error': 'Task not found'}), 404
+            
+        return jsonify(task)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 # --- End Portfolio APIs ---
 
 @app.route('/analyze', methods=['GET', 'POST'])

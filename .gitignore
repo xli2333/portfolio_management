@@ -14,6 +14,7 @@ client/node_modules/
 portfolio.json
 company_summaries.json
 *.log
+knowledge_base/deep_research_tasks.json
 
 # Knowledge base documents and reports
 knowledge_base/**/*.pdf
@@ -33,3 +34,10 @@ test_realtime.py
 
 # Vercel ignore (if not already in .vercelignore)
 .vercel/
+
+# Exclude all markdown files except README.md
+*.md
+!README.md
+
+# Exclude CSV files
+*.csv
