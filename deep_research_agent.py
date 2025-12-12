@@ -32,8 +32,9 @@ class DeepResearchAgent:
         Args:
             api_key: User's Gemini API key
         """
+        # Do not set os.environ["GOOGLE_API_KEY"] globally to avoid conflicts
+        # Initialize client directly with the key
         self.api_key = api_key
-        os.environ["GOOGLE_API_KEY"] = api_key
         self.client = genai.Client(api_key=api_key)
         logger.info("Deep Research Agent initialized")
 

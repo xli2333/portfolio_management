@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, Upload, FileText, Bot, Trash2, Send, Paperclip, CheckSquare, Square, Download, Sparkles, X } from 'lucide-react';
+import { ArrowLeft, Upload, FileText, Bot, Trash2, Send, Paperclip, CheckSquare, Square, Download, Loader2, X } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 
@@ -592,7 +592,6 @@ ${result.file_record.filename}\
                                 )}
                                 title="使用 Google 官方 Deep Research API 生成超级深度报告（10-20分钟）"
                             >
-                                <Sparkles size={12} />
                                 {ultraDeepLoading ? "生成中..." : "顶级深度报告"}
                             </button>
 
@@ -701,7 +700,6 @@ ${result.file_record.filename}\
                         {/* Header */}
                         <div className="bg-black text-white p-6 flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <Sparkles size={24} />
                                 <h2 className="text-2xl font-black font-serif">顶级深度报告</h2>
                             </div>
                             <button
@@ -766,7 +764,6 @@ ${result.file_record.filename}\
                                     onClick={handleGenerateUltraDeepReport}
                                     className="flex-1 bg-black text-white py-3 px-6 font-black uppercase tracking-wider hover:bg-gray-800 transition-colors flex items-center justify-center gap-2"
                                 >
-                                    <Sparkles size={16} />
                                     开始生成
                                 </button>
                                 <button
@@ -786,7 +783,7 @@ ${result.file_record.filename}\
                 <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
                     <div className="bg-white border-4 border-neon p-8 max-w-md shadow-[8px_8px_0px_0px_rgba(255,242,0,1)] animate-pulse">
                         <div className="flex items-center gap-4 mb-4">
-                            <Sparkles size={32} className="text-black animate-spin" />
+                            <Loader2 size={32} className="text-black animate-spin" />
                             <h3 className="text-xl font-black font-serif">Deep Research 进行中...</h3>
                         </div>
                         <p className="text-sm font-mono text-gray-600 mb-4">
