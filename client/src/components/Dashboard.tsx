@@ -449,9 +449,9 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
     const handleRemove = async (symbol: string, e: React.MouseEvent) => {
         e.stopPropagation();
         if(!confirm(`确认从组合中移除 ${symbol} 吗？`)) return;
-        
+
         try {
-            const res = await fetch(`${apiBase}/api/portfolio/remove?symbol=${symbol}`, { 
+            const res = await fetch(`${apiBase}/api/portfolio/remove?symbol=${symbol}`, {
                 method: 'DELETE',
                 headers: { 'User-ID': userId }
             });
@@ -459,6 +459,15 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
         } catch (err) {
             console.error(err);
         }
+    };
+
+    // Update pin status locally without full refresh
+    const handleUpdatePinStatus = (symbol: string, isPinned: boolean) => {
+        setHoldings(prevHoldings =>
+            prevHoldings.map(h =>
+                h.symbol === symbol ? { ...h, is_pinned: isPinned } : h
+            )
+        );
     };
 
     const formatMoney = (val: number | undefined | null, currency: string = 'USD') => {
@@ -510,10 +519,11 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
             </div>
 
             {currentTab === 'advisor' ? (
-                <AIAdvisorView 
-                    holdings={holdings} 
-                    onNavigate={onNavigateKnowledgeBase} 
+                <AIAdvisorView
+                    holdings={holdings}
+                    onNavigate={onNavigateKnowledgeBase}
                     onRefresh={fetchPortfolio}
+                    onUpdatePinStatus={handleUpdatePinStatus}
                     userId={userId}
                 />
             ) : (
