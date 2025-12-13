@@ -151,6 +151,26 @@ REPORT_CSS = """
         color: #94a3b8;
         font-size: 8pt;
     }
+    
+    /* STRICT LAYOUT CONTAINER */
+    .content-wrapper {
+        width: 17cm; /* Explicitly match A4 (21cm) - Margins (2cm+2cm) */
+        max-width: 100%%;
+        overflow: hidden; /* Cut off if it still overflows */
+        word-wrap: break-word;
+        word-break: break-all;
+    }
+    
+    a {
+        word-wrap: break-word;
+        word-break: break-all;
+        color: #2563eb;
+    }
+    
+    img {
+        max-width: 100%%;
+        height: auto;
+    }
 </style>
 """
 
@@ -174,8 +194,9 @@ def _get_font_paths():
         regular_font = 'Helvetica'
         
     # Determine Bold Font (Headings)
-    if os.path.exists(yahei_bold):
-        bold_font = yahei_bold
+    # UNIFY TO SERIF as requested by user ("All serif")
+    if os.path.exists(serif):
+        bold_font = serif
     elif os.path.exists(yahei):
         bold_font = yahei
     else:
@@ -227,8 +248,10 @@ def create_markdown_pdf(symbol, markdown_text) -> bytes:
             <p style="color: #64748b; font-size: 12pt;">AI Deep Research Agent</p>
         </div>
 
-        <!-- Main Content -->
-        {html_content}
+        <!-- Main Content with PHYSICAL Constraint -->
+        <div class="content-wrapper">
+            {html_content}
+        </div>
     </body>
     </html>
     """
