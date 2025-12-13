@@ -279,8 +279,11 @@ class DeepResearchAgent:
                 filename = f"UltraDeepReport_{symbol}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
                 
                 # Save using existing service (Saves to Disk + Supabase Metadata)
+                # Fix: If symbol is None (e.g. MACRO/STRATEGY mode), use mode as symbol
+                save_symbol = symbol if symbol else mode
+                
                 save_result = knowledge_service.save_document(
-                    symbol,
+                    save_symbol,
                     pdf_bytes,
                     filename,
                     doc_type='ultra_deep_report',
