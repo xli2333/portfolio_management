@@ -542,15 +542,31 @@ def generate_agent_report():
         if report_text.startswith("Error") or report_text.startswith("Agent Error"):
              return jsonify({'error': report_text}), 500
              
+        print(f"[Info] Agent generated report length: {len(report_text)} chars")
         results = {'status': 'success', 'report_text': report_text}
 
         # 3. Generate & Save Final Report PDF
-        user_id = request.headers.get('User-ID', 'anonymous')
-        pdf_bytes = create_markdown_pdf(symbol, report_text)
-        filename = f"DeepReport_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-        save_result = knowledge_service.save_document(symbol, pdf_bytes, filename, doc_type='ai_report', user_id=user_id)
+        try:
+            user_id = request.headers.get('User-ID', 'anonymous')
+            import time
+            t0 = time.time()
+            pdf_bytes = create_markdown_pdf(symbol, report_text)
+            
+            if not pdf_bytes or len(pdf_bytes) == 0:
+                print(f"[Error] PDF generation returned empty bytes. Time taken: {time.time()-t0:.2f}s")
+                results['pdf_error'] = "PDF generation failed internally (empty result)"
+            else:
+                print(f"[Info] PDF generated successfully ({len(pdf_bytes)} bytes) in {time.time()-t0:.2f}s")
+                filename = f"DeepReport_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+                save_result = knowledge_service.save_document(symbol, pdf_bytes, filename, doc_type='ai_report', user_id=user_id)
+                results['file_record'] = save_result
+                
+        except Exception as pdf_e:
+            import traceback
+            traceback.print_exc()
+            print(f"[Error] PDF Generation Critical Failure: {pdf_e}")
+            results['pdf_error'] = f"PDF generation crashed: {str(pdf_e)}"
         
-        results['file_record'] = save_result
         return jsonify(results)
 
     except Exception as e:
