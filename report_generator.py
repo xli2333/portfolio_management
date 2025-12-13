@@ -230,12 +230,20 @@ def create_markdown_pdf(symbol, markdown_text) -> bytes:
     # 4. Convert HTML to PDF using xhtml2pdf
     buffer = io.BytesIO()
     
-    # link_callback could be added here if we had local images in the MD, 
-    # but for now we focus on text/tables.
+    # link_callback to allow loading local resources (fonts)
+    # This is critical for Docker environments where pisa might not resolve relative paths or needs explicit permission
+    def link_callback(uri, rel):
+        # Allow loading from fonts directory. 
+        # uri might be a file path or url, we just want to map it to our known fonts dir
+        if 'fonts' in uri or uri.endswith('.ttf'):
+             return os.path.join(FONTS_DIR, os.path.basename(uri))
+        return uri
+
     pisa_status = pisa.CreatePDF(
         src=full_html,
         dest=buffer,
-        encoding='utf-8'
+        encoding='utf-8',
+        link_callback=link_callback
     )
     
     if pisa_status.err:
@@ -310,8 +318,18 @@ def create_chat_pdf(symbol, messages) -> bytes:
     </html>
     """
     
-    buffer = io.BytesIO()
-    pisa_status = pisa.CreatePDF(src=full_html, dest=buffer, encoding='utf-8')
+    # link_callback for fonts
+    def link_callback(uri, rel):
+        if 'fonts' in uri or uri.endswith('.ttf'):
+             return os.path.join(FONTS_DIR, os.path.basename(uri))
+        return uri
+        
+    pisa_status = pisa.CreatePDF(
+        src=full_html, 
+        dest=buffer, 
+        encoding='utf-8',
+        link_callback=link_callback
+    )
     
     if pisa_status.err:
         logger.error(f"Chat PDF Error: {pisa_status.err}")
