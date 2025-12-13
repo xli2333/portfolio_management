@@ -42,11 +42,12 @@ REPORT_CSS = """
         font-size: 10.5pt;
         line-height: 1.6;
         color: #333333;
+        word-break: break-all;
     }
 
-    /* Headings - Modern Sans-Serif */
+    /* Headings - Serif (Unified Style) */
     h1, h2, h3, h4, h5, h6 {
-        font-family: 'BoldFont', sans-serif;
+        font-family: 'RegularFont', sans-serif;
         color: #1a202c; /* Dark Slate */
         font-weight: bold;
         line-height: 1.3;
@@ -78,7 +79,7 @@ REPORT_CSS = """
     /* Text Elements */
     p {
         margin-bottom: 10px;
-        text-align: justify;
+        text-align: left;
     }
 
     strong {
