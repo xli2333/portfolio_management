@@ -83,13 +83,15 @@ REPORT_CSS = """
     }
 
     strong {
-        font-family: 'BoldFont', sans-serif;
+        font-family: 'RegularFont', sans-serif;
         color: #000000;
+        font-weight: bold;
     }
 
     /* Tables - Professional Data Grid */
     table {
         width: 100%%;
+        table-layout: fixed;
         border-collapse: collapse;
         margin: 15px 0;
         font-size: 9pt;
@@ -98,11 +100,12 @@ REPORT_CSS = """
     th {
         background-color: #f1f5f9;
         color: #1e293b;
-        font-family: 'BoldFont', sans-serif;
+        font-family: 'RegularFont', sans-serif;
         font-weight: bold;
         border-bottom: 2px solid #cbd5e1;
         padding: 8px;
         text-align: left;
+        word-wrap: break-word;
     }
     
     td {
@@ -128,6 +131,8 @@ REPORT_CSS = """
         padding: 2px 4px;
         border-radius: 4px;
         font-size: 9pt;
+        white-space: pre-wrap;
+        word-wrap: break-word;
     }
     
     blockquote {
