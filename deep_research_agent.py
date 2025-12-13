@@ -169,10 +169,25 @@ class DeepResearchAgent:
                             f"研究进行中... ({elapsed_minutes}分{elapsed_time % 60}秒) - 状态: {status}"
                         )
 
+                    # --- ENHANCED LOGGING START ---
+                    # Inspect internal attributes to see what the agent is doing
+                    debug_info = {}
+                    try:
+                        # Try to extract potential debug fields if they exist in the SDK response
+                        # Note: The actual field names depend on the specific API version/model structure
+                        # We log everything valid to find the clue.
+                        for attr in dir(current_interaction):
+                            if not attr.startswith('_') and not callable(getattr(current_interaction, attr)):
+                                val = getattr(current_interaction, attr)
+                                if val: debug_info[attr] = str(val)[:200] # Truncate long values
+                    except:
+                        pass
+                    
                     logger.info(
                         f"[{attempt}/{self.MAX_RETRIES}] "
-                        f"Elapsed: {elapsed_time}s | Status: {status}"
+                        f"Elapsed: {elapsed_time}s | Status: {status} | Debug: {debug_info}"
                     )
+                    # --- ENHANCED LOGGING END ---
 
                     if status == "completed":
                         if current_interaction.outputs:
@@ -194,7 +209,9 @@ class DeepResearchAgent:
 
                     elif status == "failed":
                         error_msg = getattr(current_interaction, 'error', '未知错误')
-                        logger.error(f"Research task failed: {error_msg}")
+                        # Try to get more error details
+                        full_error_details = str(current_interaction)
+                        logger.error(f"Research task failed: {error_msg} | Details: {full_error_details}")
                         return False, "", f"任务失败: {error_msg}"
 
                     elif status == "cancelled":
@@ -207,16 +224,24 @@ class DeepResearchAgent:
                         time.sleep(self.SLEEP_INTERVAL)
 
                 except Exception as poll_error:
-                    logger.error(f"Polling error at attempt {attempt}: {poll_error}")
+                    logger.error(f"Polling error at attempt {attempt}: {poll_error}", exc_info=True)
                     if attempt < self.MAX_RETRIES:
                         time.sleep(self.SLEEP_INTERVAL)
                     else:
                         return False, "", f"轮询过程中发生错误: {str(poll_error)}"
 
-            # Timeout
-            error_msg = f"任务超时（{self.MAX_RETRIES * self.SLEEP_INTERVAL // 60}分钟）"
-            logger.error(error_msg)
-            return False, "", error_msg
+            # Timeout Handling - Enhanced
+            timeout_msg = f"任务超时（{self.MAX_RETRIES * self.SLEEP_INTERVAL // 60}分钟）"
+            logger.error(timeout_msg)
+            
+            # Try to print the final state before giving up
+            try:
+                final_state = self.client.interactions.get(interaction.id)
+                logger.error(f"Final Interaction State on Timeout: {final_state}")
+            except:
+                logger.error("Could not fetch final state on timeout.")
+
+            return False, "", timeout_msg
 
         except Exception as e:
             error_msg = f"Deep Research 失败: {str(e)}"
