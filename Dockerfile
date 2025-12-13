@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     gcc \
     make \
     wget \
+    pkg-config \
+    libcairo2-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install TA-Lib C library
