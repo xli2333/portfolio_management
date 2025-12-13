@@ -88,7 +88,7 @@ REPORT_CSS = """
 
     /* Tables - Professional Data Grid */
     table {
-        width: 100%;
+        width: 100%%;
         border-collapse: collapse;
         margin: 15px 0;
         font-size: 9pt;
