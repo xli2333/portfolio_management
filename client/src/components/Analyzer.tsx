@@ -247,10 +247,12 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState('');
+  const [isEditing, setIsEditing] = useState(false); // New state for toggle
   
   const chartRef = useRef<StockChartRef>(null);
   const stockChatRef = useRef<StockChatRef>(null);
-  
+  const inputRef = useRef<HTMLInputElement>(null); // Ref for auto-focus
+
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000'; 
 
   const handleAIAnalysis = () => {
@@ -270,7 +272,8 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
     
     setLoading(true);
     setError('');
-    setResult(null);
+    // Don't clear result immediately to prevent UI flash, unless it's a new search
+    // setResult(null); 
     const url = `${apiBase}/analyze?symbol=${s}&period=${period}`;
     try {
       const res = await fetch(url);
@@ -287,6 +290,7 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setResult(data);
+      setIsEditing(false); // Exit edit mode on success
     } catch (err: any) {
       console.error("Fetch error:", err);
       setError(err.message || 'Network error or timeout');
@@ -294,6 +298,13 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
       setLoading(false);
     }
   };
+
+  // Focus input when entering edit mode
+  useEffect(() => {
+      if (isEditing && inputRef.current) {
+          inputRef.current.focus();
+      }
+  }, [isEditing]);
 
   // Initial fetch if symbol provided
   useEffect(() => {
@@ -316,16 +327,41 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
             
             {/* Search Input - Bold & Massive */}
             <div className="col-span-12 lg:col-span-6">
-                    <div className="flex items-baseline gap-4">
-                    <span className="text-xl font-bold text-gray-400">#</span>
-                    <input 
-                        type="text" 
-                        value={symbol}
-                        onChange={(e) => setSymbol(e.target.value.toUpperCase())}
-                        onKeyDown={(e) => e.key === 'Enter' && fetchAnalysis()}
-                        placeholder="CODE"
-                        className="text-7xl font-black tracking-tighter w-full bg-transparent border-none outline-none placeholder:text-gray-200 focus:placeholder:text-transparent p-0 m-0 leading-none uppercase font-mono"
-                    />
+                    <div className="flex items-baseline gap-4 h-[72px] relative group">
+                        {/* Interactive Display: Name or Input */}
+                        {!isEditing && result ? (
+                            <div 
+                                onClick={() => setIsEditing(true)}
+                                className="text-5xl md:text-7xl font-black tracking-tighter cursor-pointer hover:text-gray-700 transition-colors font-sans truncate"
+                                title="点击修改代码"
+                            >
+                                {result.stock_info.name}
+                            </div>
+                        ) : (
+                            <div className="flex items-baseline w-full">
+                                <span className="text-xl font-bold text-gray-400 mr-2">#</span>
+                                <input 
+                                    ref={inputRef}
+                                    type="text" 
+                                    value={symbol}
+                                    onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+                                    onKeyDown={(e) => e.key === 'Enter' && fetchAnalysis()}
+                                    onBlur={() => {
+                                        // Only exit edit mode if we have a result to fall back to
+                                        if (result) setIsEditing(false); 
+                                    }}
+                                    placeholder="CODE"
+                                    className="text-7xl font-black tracking-tighter w-full bg-transparent border-none outline-none placeholder:text-gray-200 focus:placeholder:text-transparent p-0 m-0 leading-none uppercase font-mono"
+                                />
+                            </div>
+                        )}
+                        
+                        {/* Edit Hint (only visible when not editing and hovered) */}
+                        {!isEditing && result && (
+                            <div className="absolute -top-4 left-0 text-[10px] text-gray-300 font-bold tracking-widest opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                CLICK TO EDIT
+                            </div>
+                        )}
                     </div>
                     <div className="flex gap-4 mt-4">
                         <button 
