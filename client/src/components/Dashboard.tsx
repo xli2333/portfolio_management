@@ -189,25 +189,25 @@ function AnalyticsSection({ data, holdings }: { data: AnalysisData, holdings: Ho
             {/* Metrics Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-gray-50 p-6 border-l-4 border-black hover:bg-white transition-colors">
-                    <div className="text-xs font-bold font-serif text-gray-500 mb-2">年化收益率 (CAGR)</div>
+                    <div className="text-xs font-bold font-serif text-gray-500 mb-2">年化收益率</div>
                     <div className={cn("text-3xl font-black font-mono", data.metrics.annual_return_pct >= 0 ? "text-green-600" : "text-red-600")}>
                         {data.metrics.annual_return_pct.toFixed(2)}%
                     </div>
                 </div>
                 <div className="bg-gray-50 p-6 border-l-4 border-black hover:bg-white transition-colors">
-                    <div className="text-xs font-bold font-serif text-gray-500 mb-2">夏普比率 (Sharpe)</div>
+                    <div className="text-xs font-bold font-serif text-gray-500 mb-2">夏普比率</div>
                     <div className="text-3xl font-black font-mono text-black">
                         {data.metrics.sharpe_ratio.toFixed(2)}
                     </div>
                 </div>
                 <div className="bg-gray-50 p-6 border-l-4 border-black hover:bg-white transition-colors">
-                    <div className="text-xs font-bold font-serif text-gray-500 mb-2">波动率 (Volatility)</div>
+                    <div className="text-xs font-bold font-serif text-gray-500 mb-2">波动率</div>
                     <div className="text-3xl font-black font-mono text-black">
                         {data.metrics.volatility_pct.toFixed(2)}%
                     </div>
                 </div>
                 <div className="bg-gray-50 p-6 border-l-4 border-black hover:bg-white transition-colors">
-                    <div className="text-xs font-bold font-serif text-gray-500 mb-2">最大回撤 (Max Drawdown)</div>
+                    <div className="text-xs font-bold font-serif text-gray-500 mb-2">最大回撤</div>
                     <div className="text-3xl font-black font-mono text-red-600">
                         {data.metrics.max_drawdown_pct.toFixed(2)}%
                     </div>
@@ -226,7 +226,7 @@ function AnalyticsSection({ data, holdings }: { data: AnalysisData, holdings: Ho
                 {/* Asset Allocation Pie Chart */}
                 <div className="bg-white border-2 border-gray-100 p-6 shadow-sm">
                     <div className="text-sm font-bold font-serif text-gray-600 mb-6 flex items-center gap-2">
-                        <PieChartIcon size={16} /> 组合资产分布 (Market Value)
+                        <PieChartIcon size={16} /> 组合资产分布
                     </div>
                     <div className="w-full h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -503,7 +503,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                         )}
                     >
                         <BrainCircuit size={18} />
-                        AI 投顾 (Advisor)
+                        AI 投顾
                         <span className="bg-black text-white text-[10px] px-1 py-0.5 rounded-sm">NEW</span>
                     </button>
                 </div>
@@ -758,7 +758,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                                 
                                 <div className="space-y-6">
                                     <div>
-                                        <label className="block text-xs font-bold font-serif text-gray-500 mb-2">股票代码 (Symbol)</label>
+                                        <label className="block text-xs font-bold font-serif text-gray-500 mb-2">股票代码</label>
                                         <input 
                                             className="w-full bg-gray-50 border-2 border-gray-200 p-4 text-xl font-bold font-mono focus:border-black focus:ring-0 outline-none uppercase placeholder:text-gray-300 transition-colors"
                                             placeholder="600519"
@@ -768,7 +768,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label className="block text-xs font-bold font-serif text-gray-500 mb-2">持仓数量 (Shares)</label>
+                                            <label className="block text-xs font-bold font-serif text-gray-500 mb-2">持仓数量</label>
                                             <input 
                                                 type="number"
                                                 className="w-full bg-gray-50 border-2 border-gray-200 p-4 text-xl font-bold font-mono focus:border-black focus:ring-0 outline-none transition-colors"
@@ -778,7 +778,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                                             />
                                         </div>
                                         <div>
-                                            <label className="block text-xs font-bold font-serif text-gray-500 mb-2">平均成本 (Cost)</label>
+                                            <label className="block text-xs font-bold font-serif text-gray-500 mb-2">平均成本</label>
                                             <input 
                                                 type="number"
                                                 step="0.01"

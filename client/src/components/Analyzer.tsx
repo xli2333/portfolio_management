@@ -308,7 +308,7 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
             onClick={onBack}
             className="mb-8 flex items-center gap-2 text-sm font-bold font-serif tracking-widest text-gray-400 hover:text-black transition-colors"
         >
-            <ArrowLeft size={16} /> 返回首页 (Dashboard)
+            <ArrowLeft size={16} /> 返回首页
         </button>
 
         {/* --- Header Section --- */}
@@ -340,9 +340,9 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
                         onChange={(e) => setPeriod(e.target.value)}
                         className="bg-gray-100 border-none text-sm font-bold font-serif px-4 py-3 cursor-pointer focus:ring-2 focus:ring-black outline-none"
                         >
-                        <option value="daily">日线 (Daily)</option>
-                        <option value="weekly">周线 (Weekly)</option>
-                        <option value="monthly">月线 (Monthly)</option>
+                        <option value="daily">日线</option>
+                        <option value="weekly">周线</option>
+                        <option value="monthly">月线</option>
                     </select>
                     </div>
             </div>
@@ -377,7 +377,7 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
                 <div className="mb-8">
                 {loading && (
                     <div className="p-4 bg-gray-100 text-gray-500 font-mono text-sm animate-pulse">
-                        正在获取数据... (Akshare API) 可能需要 10-20 秒。
+                        正在获取数据... 可能需要 10-20 秒。
                     </div>
                 )}
                 </div>
@@ -429,7 +429,7 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
 
                     {/* Recommendation (Desktop Only) */}
                     <div className="hidden md:flex col-span-12 md:col-span-4 flex-col justify-between">
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 font-serif">智能投顾建议 (Recommendation)</h2>
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 font-serif">智能投顾建议</h2>
                         <div>
                             <div className="text-5xl font-black tracking-tighter leading-none mb-2 font-serif">
                                 {result.comprehensive_score.recommendation}
@@ -447,7 +447,7 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
 
                     {/* Regime (Desktop Only) */}
                     <div className="hidden md:flex col-span-12 md:col-span-4 flex-col justify-between text-right">
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 font-serif">市场状态分析 (Regime)</h2>
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 font-serif">市场状态分析</h2>
                         <div>
                             <div className="text-3xl font-bold uppercase font-serif">
                                 {result.comprehensive_score.regime}
@@ -463,7 +463,7 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
                 {/* Chart Section */}
                 <div className="mb-16">
                     <div className="flex justify-between items-end mb-4">
-                        <h2 className="text-2xl font-black tracking-tight font-serif">价格走势 (PRICE ACTION)</h2>
+                        <h2 className="text-2xl font-black tracking-tight font-serif">价格走势</h2>
                         <div className="flex items-center gap-4">
                             <button 
                                 onClick={handleAIAnalysis}

@@ -82,7 +82,7 @@ export function AIAdvisorView({ holdings, onNavigate, onRefresh, onUpdatePinStat
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="mb-12 border-b-4 border-black pb-6">
-                <h2 className="text-3xl font-black font-serif tracking-tighter">AI 投顾中心 (Knowledge Base)</h2>
+                <h2 className="text-3xl font-black font-serif tracking-tighter">AI 投顾中心</h2>
                 <p className="text-gray-500 font-mono mt-2">智能分析 / 研报生成 / 深度问答</p>
             </div>
 
@@ -106,7 +106,7 @@ export function AIAdvisorView({ holdings, onNavigate, onRefresh, onUpdatePinStat
                     className="border-2 border-black p-6 bg-gray-50 hover:bg-black hover:text-white transition-all cursor-pointer group relative overflow-hidden"
                 >
                     <div className="relative z-10">
-                        <div className="text-2xl font-black font-serif mb-2">宏观视野 (Macro)</div>
+                        <div className="text-2xl font-black font-serif mb-2">宏观视野</div>
                         <div className="text-sm font-mono opacity-70 mb-4 group-hover:opacity-100">全球经济 / 政策解读 / 宏观趋势</div>
                         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest border-t border-current pt-4 opacity-50 group-hover:opacity-100">
                             进入分析室 <span>→</span>
@@ -123,7 +123,7 @@ export function AIAdvisorView({ holdings, onNavigate, onRefresh, onUpdatePinStat
                     className="border-2 border-black p-6 bg-gray-50 hover:bg-black hover:text-white transition-all cursor-pointer group relative overflow-hidden"
                 >
                     <div className="relative z-10">
-                        <div className="text-2xl font-black font-serif mb-2">策略精选 (Strategy)</div>
+                        <div className="text-2xl font-black font-serif mb-2">策略精选</div>
                         <div className="text-sm font-mono opacity-70 mb-4 group-hover:opacity-100">资产配置 / 仓位管理 / 投资方法论</div>
                         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest border-t border-current pt-4 opacity-50 group-hover:opacity-100">
                             进入决策室 <span>→</span>
