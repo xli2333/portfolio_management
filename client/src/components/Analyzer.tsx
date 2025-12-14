@@ -60,8 +60,8 @@ function BigSwissGauge({ score }: { score: number }) {
   const arcPath = Math.abs(safeScore) < 1 ? "" : `M 100 20 A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
 
   return (
-    <div className="w-full h-full min-h-[200px] flex flex-col items-center justify-center relative -translate-y-4 -translate-x-6">
-        <div className="relative w-[360px] h-[180px]">
+    <div className="w-full h-full min-h-[160px] md:min-h-[200px] flex flex-col items-center justify-center relative md:-translate-y-4 md:-translate-x-6">
+        <div className="relative w-[300px] md:w-[360px] h-[150px] md:h-[180px]">
             <svg viewBox="0 0 200 110" className="w-full h-full overflow-visible">
                 <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#F0F0F0" strokeWidth={strokeWidth} strokeLinecap="butt" />
                 <path d={arcPath} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="butt" className="transition-all duration-1000 ease-out" />
@@ -388,34 +388,38 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
             <main className="animate-in fade-in slide-in-from-bottom-8 duration-700">
                 
                 {/* Top Grid: Recommendation, Gauge, Regime */}
-                <div className="grid grid-cols-12 gap-8 mb-16 border-b border-gray-200 pb-16 items-stretch">
+                <div className="flex flex-wrap md:grid md:grid-cols-12 gap-4 md:gap-8 mb-8 md:mb-16 border-b border-gray-200 pb-8 md:pb-16 items-stretch">
                     
-                    {/* Recommendation Text */}
-                    <div className="col-span-12 md:col-span-4 flex flex-col justify-between">
-                        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 font-serif">智能投顾建议 (Recommendation)</h2>
+                    {/* Recommendation Text - Mobile: Order 1 (Left Half) */}
+                    <div className="w-1/2 md:w-auto order-1 md:order-none md:col-span-4 flex flex-col justify-between pr-2 md:pr-0 border-r md:border-none border-gray-100">
+                        <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400 font-serif whitespace-nowrap overflow-hidden">
+                            智能投顾建议 <span className="hidden md:inline">(Recommendation)</span>
+                        </h2>
                         <div>
-                            <div className="text-5xl font-black tracking-tighter leading-none mb-2 font-serif">
+                            <div className="text-3xl md:text-5xl font-black tracking-tighter leading-none mb-2 font-serif">
                                 {result.comprehensive_score.recommendation}
                             </div>
-                            <div className="text-sm font-mono bg-black text-white px-3 py-1 inline-block">
+                            <div className="text-[10px] md:text-sm font-mono bg-black text-white px-2 md:px-3 py-1 inline-block">
                                 评分: {Math.round(result.comprehensive_score.score)}
                             </div>
                         </div>
                     </div>
 
-                    {/* Big Swiss Gauge - Filling the center card */}
-                    <div className="col-span-12 md:col-span-4">
+                    {/* Big Swiss Gauge - Mobile: Order 3 (Bottom Full Width) */}
+                    <div className="w-full md:w-auto order-3 md:order-none md:col-span-4 mt-4 md:mt-0">
                         <BigSwissGauge score={result.comprehensive_score.score} />
                     </div>
 
-                    {/* Regime Analysis */}
-                    <div className="col-span-12 md:col-span-4 flex flex-col justify-between text-right">
-                            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 font-serif">市场状态分析 (Regime)</h2>
+                    {/* Regime Analysis - Mobile: Order 2 (Right Half) */}
+                    <div className="w-1/2 md:w-auto order-2 md:order-none md:col-span-4 flex flex-col justify-between text-right pl-2 md:pl-0">
+                            <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400 font-serif whitespace-nowrap overflow-hidden">
+                                市场状态分析 <span className="hidden md:inline">(Regime)</span>
+                            </h2>
                             <div>
-                            <div className="text-3xl font-bold uppercase font-serif">
+                            <div className="text-xl md:text-3xl font-bold uppercase font-serif truncate">
                                 {result.comprehensive_score.regime}
                             </div>
-                            <div className="text-sm text-gray-500 mt-2 leading-snug font-serif">
+                            <div className="text-[10px] md:text-sm text-gray-500 mt-1 md:mt-2 leading-snug font-serif hidden md:block">
                                 基于波动率与动量因子，当前市场呈现强烈的 {result.comprehensive_score.regime} 特征。
                             </div>
                             </div>

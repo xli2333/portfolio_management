@@ -1,230 +1,121 @@
-# 🚀智能证券投资组合管理系统
+# 智能证券投资组合管理系统
 
-> **AI 驱动的智能投顾平台**
-> 版本: 2.1.0 | 架构: React + Flask + Supabase | AI: Google Gemini (Deep Research)
+一个集成专业级技术分析、AI 智能投顾、知识库管理和深度研报生成的现代化投资组合管理平台。基于 React、Flask 和 Google Gemini 构建，旨在为个人投资者提供机构级的分析工具和决策支持。
 
-一个集成技术分析、AI 投顾、知识库管理和深度研报生成的现代化投资组合管理平台。支持多用户注册、数据隔离、云端部署。
+## 核心功能
 
----
+### 1. 投资组合管理
+*   **全市场覆盖**：支持美股、A 股市场的实时行情获取与监控。
+*   **持仓可视化**：提供直观的持仓列表，实时计算持仓市值、浮动盈亏、当日盈亏及收益率。
+*   **交易记录**：支持买入、卖出操作，自动更新平均成本和持仓数量。
+*   **数据大屏**：仪表盘展示总资产净值、资产分布饼图及净值走势曲线。
 
-## ✨ 核心特性
+### 2. 专业技术分析
+*   **交互式图表**：集成高性能 K 线图表，支持缩放、平移和十字光标查看细节。
+*   **多维指标**：内置 MA (移动平均线)、MACD、RSI、KDJ、布林带 (Bollinger Bands) 等经典指标。
+*   **高级信号**：自动识别金叉/死叉、超买/超卖、趋势反转等关键交易信号。
+*   **趋势预测**：引入 SuperTrend 和 Ichimoku Cloud (一目均衡表) 等高级趋势指标。
 
-### 📊 投资组合管理
-- **实时行情监控**：自动获取美股、A股实时数据
-- **持仓管理**：添加、编辑、删除持仓，自动计算盈亏
-- **技术指标分析**：MA, MACD, RSI, KDJ, SuperTrend, Ichimoku Cloud 等
-- **交易信号识别**：金叉/死叉、趋势反转、超买超卖预警
-- **可视化图表**：专业级 K 线图，支持多指标叠加
+### 3. AI 智能投顾 (AI Advisor)
+*   **智能对话引擎**：基于 Google Gemini 2.5 大模型，提供自然语言交互体验。
+*   **上下文感知**：AI 能够读取用户的持仓信息和实时市场数据，提供个性化的投资建议。
+*   **多模态分析**：支持上传股票走势截图，AI 可直接分析图表形态并给出操作建议。
+*   **风险提示**：在给出建议的同时，自动评估潜在风险和波动率。
 
-### 🤖 AI 智能投顾
-- **Google Gemini 驱动**：基于Gemini 2.5 flash/pro 模型
-- **智能对话**：针对持仓股票进行智能问答
-- **上下文感知**：自动加载用户持仓和历史数据
-- **专业分析**：提供技术面、基本面综合建议
-- **图像识别**：识别股票走势图像，并提供当前价格下的综合建议
+### 4. 知识库与研报系统 (RAG)
+*   **文档管理**：支持上传 PDF 格式的券商研报、财报或行业分析文档。
+*   **检索增强生成 (RAG)**：AI 可基于用户上传的文档内容进行回答，确保信息的准确性和来源可追溯。
+*   **对话归档**：支持将高价值的 AI 对话记录保存到知识库，方便日后复盘。
+*   **文档置顶**：关键文档支持置顶操作，便于快速访问。
 
-### 📚 知识库管理
-- **文档上传**：支持 PDF 研报上传和管理
-- **对话导出**：支持 多轮对话中选定对话的导出与长久保存
-- **智能检索**：基于选定文档内容的 AI 问答
-- **多股票支持**：按股票代码分类管理文档
-- **云端存储**：Supabase Storage / Render Disk 安全存储
+### 5. 顶级深度报告 (Ultra Deep Report)
+*   **深度研究代理**：集成 Google 官方 Deep Research 能力，模拟人类分析师的研究流程。
+*   **多模式生成**：
+    *   **个股深度分析**：覆盖基本面、财务状况、竞争优势及估值模型。
+    *   **宏观经济分析**：分析全球经济趋势、货币政策及地缘政治影响。
+    *   **量化策略设计**：生成包含因子选择、回测逻辑及风险管理的投资策略。
+*   **异步任务系统**：支持后台长时间运行复杂研究任务，生成数万字的专业研报。
 
-### ⚡ 顶级深度报告 (Ultra Deep Report)
-- **Deep Research API**：集成 Google 官方 Deep Research 能力
-- **三种模式**：个股深度分析 (STOCK)、宏观经济分析 (MACRO)、量化策略设计 (STRATEGY)
-- **异步任务系统**：后台自动执行耗时任务，完美适配云端环境（解决 Serverless 超时问题）
-- **万字长文**：生成 5000+ 字的专业级研报，包含大量数据引用和参考文献
+### 6. 移动端适配 (Mobile First)
+*   **响应式布局**：针对手机端进行了深度优化，采用垂直流布局和卡片式设计。
+*   **单手操作**：优化了关键按钮的位置，支持横向滑动查看文档列表，符合移动端操作习惯。
+*   **全功能保留**：在移动端保留了包括图表分析、AI 对话、研报生成在内的所有核心功能。
 
-### 👥 多用户系统
-- **邮箱注册**：Supabase 认证系统
-- **数据隔离**：RLS (Row Level Security) 确保数据安全
-- **会话管理**：自动登录状态保持
-- **安全登出**：完整的认证生命周期管理
+### 7. 多用户与安全
+*   **身份认证**：完整的注册、登录、登出流程，支持邮箱认证。
+*   **数据隔离**：基于行级安全策略 (Row Level Security)，确保不同用户的数据严格隔离。
+*   **云端同步**：所有配置和数据云端存储，多设备无缝切换。
 
----
+## 工作流
 
-## 🏗️ 技术架构
+### 用户日常使用流程
 
-### 后端 (Backend)
-- **框架**：Flask 3.0+ (支持异步任务)
-- **语言**：Python 3.12+
-- **数据库**：Supabase PostgreSQL
-- **AI 模型**：Google Gemini 2.0 Flash / Deep Research
-- **数据源**：AKShare (财经数据)、yfinance (美股数据)
-- **技术分析**：TA-Lib, Pandas, NumPy
-- **PDF 生成**：ReportLab, PyPDF2
-- **任务管理**：本地持久化 JSON 存储 (Task Manager)
+1.  **资产检视**
+    *   登录系统，在首页仪表盘查看当日总资产盈亏及核心持仓表现。
+    *   通过资产分布图快速了解仓位集中度。
 
-### 前端 (Frontend)
-- **框架**：React 18 + TypeScript
-- **构建工具**：Vite 5.0+
-- **UI 框架**：Tailwind CSS
-- **图表库**：Lightweight Charts, Recharts
-- **图标**：Lucide React
-- **认证**：Supabase Auth
-- **交互**：实时轮询 (Polling) 任务状态
+2.  **行情分析**
+    *   点击具体持仓股票，进入详情页。
+    *   查看实时 K 线图，叠加 MACD/RSI 指标判断当前趋势。
+    *   参考系统生成的自动交易信号（如"RSI超卖"或"均线金叉"）。
 
-### 云端部署
-- **前端托管**：Vercel
-- **后端服务**：Render (Docker + Persistent Disk)
-- **数据库**：Supabase (PostgreSQL)
-- **文件存储**：Supabase Storage / Render Persistent Disk
+3.  **AI 辅助决策**
+    *   在分析页或投顾中心，向 AI 提问："根据当前技术面，茅台是否出现买点？"
+    *   AI 结合实时数据和内置策略给出建议。
+    *   若有外部研报，上传 PDF 至知识库，要求 AI："基于这份高盛的研报，分析未来的盈利预期。"
 
----
+4.  **深度研究 (周末/复盘)**
+    *   针对感兴趣的行业或宏观话题，启动 "顶级深度报告" 任务。
+    *   系统后台运行 10-20 分钟进行全网搜素和深度推理。
+    *   生成万字长文报告，用户阅读报告并保存至知识库，辅助制定下一阶段投资策略。
 
-## 📦 快速开始
+5.  **移动端随时管理**
+    *   通勤或外出时，使用手机浏览器访问系统。
+    *   通过卡片视图快速扫视行情，进行简单的买卖记录更新。
+    *   利用碎片时间阅读 AI 生成的研报摘要。
 
-### 环境要求
-- Python 3.12+
-- Node.js 18.0+
-- Git
+## 技术栈概览
+
+*   **前端**：React 18, TypeScript, Tailwind CSS, Vite, Recharts, Lightweight Charts
+*   **后端**：Python 3.12, Flask, Gunicorn
+*   **数据库**：Supabase (PostgreSQL)
+*   **AI 模型**：Google Gemini 2.5 Flash/Pro, Google Deep Research
+*   **基础设施**：Docker, Render (Web Service + Persistent Disk), Vercel
+
+## 项目演进与更新历史
+
+### 阶段一：原型验证 (v1.0)
+*   实现了基于 Python 脚本的本地数据获取和简单的技术指标计算。
+*   构建了基础的 Flask Web 界面，仅支持单机运行和本地 CSV 存储。
+
+### 阶段二：前后端分离 (v1.5)
+*   引入 React 和 Tailwind CSS 重构前端，提升交互体验。
+*   实现了基础的 K 线图表和资产表格展示。
+*   接入 AkShare 数据源，扩展了 A 股数据支持。
+
+### 阶段三：云端化与 AI 增强 (v2.0)
+*   **数据库迁移**：从本地文件迁移至 Supabase 云数据库，实现数据持久化。
+*   **多用户系统**：增加了完整的用户认证体系。
+*   **AI 1.0**：接入 Google Gemini 基础模型，实现了简单的行情问答。
+*   **知识库上线**：支持 PDF 上传和基础的 RAG 功能。
+
+### 阶段四：深度智能与移动端优化 (v2.1 - 当前版本)
+*   **深度研究 (Deep Research)**：引入异步任务队列和长文本生成能力，突破了 AI 回答的深度限制。
+*   **移动端重构**：全面优化了手机端布局，实现了媲美原生 App 的操作体验。
+*   **系统稳健性**：优化了云端部署配置，解决了 Serverless 环境下的超时和存储问题。
+
+## 部署说明
 
 ### 本地开发
+1.  克隆仓库并安装 Python 依赖 (`requirements.txt`)。
+2.  配置环境变量 (`.env`)，填入 Supabase 和 Gemini API 密钥。
+3.  启动 Flask 后端 (`python web_app.py`)。
+4.  进入 `client` 目录，安装 NPM 依赖并启动 Vite 开发服务器 (`npm run dev`)。
 
-#### 1. 克隆项目
-```bash
-git clone https://github.com/xli2333/portfolio_management.git
-cd portfolio_management
-```
-
-#### 2. 后端配置
-
-创建 `.env` 文件：
-```bash
-# Google Gemini API (必须)
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Supabase 配置 (生产环境必须)
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your_supabase_anon_public_key_here
-
-# 服务器端口 (可选，默认 5000)
-PORT=5000
-```
-
-安装依赖并启动：
-```bash
-# 创建虚拟环境
-python -m venv venv
-
-# 激活虚拟环境
-# Windows:
-.\venv\Scripts\activate
-# Linux/Mac:
-source venv/bin/activate
-
-# 安装依赖
-pip install -r requirements.txt
-
-# 启动后端
-python web_app.py
-```
-
-后端将运行在 `http://localhost:5000`
-
-#### 3. 前端配置
-
-创建 `client/.env` 文件：
-```bash
-VITE_API_URL=http://localhost:5000
-VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_public_key_here
-```
-
-安装依赖并启动：
-```bash
-cd client
-npm install
-npm run dev
-```
-
-前端将运行在 `http://localhost:5173`
+### 云端部署
+*   **后端**：推荐使用 Render 或 Railway，需挂载持久化存储以保存研报文件。
+*   **前端**：推荐使用 Vercel 或 Netlify 托管静态资源。
+*   **数据库**：使用 Supabase 托管 PostgreSQL。
 
 ---
-
-## ☁️ 云端部署
-
-### 快速部署摘要
-
-#### Supabase 数据库设置
-1. 创建 Supabase 项目
-2. 在 SQL Editor 中执行 `supabase_init.sql`
-3. 复制 Project URL 和 anon public key
-
-#### Render 后端部署
-1. 连接 GitHub 仓库
-2. 选择 Docker 运行时
-3. 开启 Persistent Disk (挂载路径 `/app/knowledge_base`) 以保存任务状态和 PDF 文件
-4. 设置环境变量：
-   - `SUPABASE_URL`
-   - `SUPABASE_KEY`
-   - `GEMINI_API_KEY`
-   - `PORT=10000`
-
-#### Vercel 前端部署
-1. 导入 GitHub 仓库
-2. 设置 Root Directory 为 `client`
-3. 设置环境变量：
-   - `VITE_API_URL` (Render 后端 URL)
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-
----
-
-## 📁 项目结构
-
-```
-portfolio_management/
-├── analyst_agent.py           # AI 分析师代理
-├── deep_research_agent.py     # Deep Research 代理 (New)
-├── task_manager.py            # 异步任务管理器 (New)
-├── analyzer.py                # 技术分析引擎
-├── advanced_indicators.py     # 高级技术指标
-├── data_fetcher.py           # 数据获取服务
-├── portfolio_service.py      # 投资组合服务
-├── knowledge_service.py      # 知识库服务
-├── report_generator.py       # 深度研报生成器
-├── web_app.py               # Flask 主应用
-├── requirements.txt         # Python 依赖
-├── Dockerfile              # Docker 配置
-├── client/                 # 前端应用
-│   ├── src/
-│   │   ├── components/     # React 组件
-│   │   │   ├── StockKnowledgeBase.tsx  # 知识库 (Updated)
-│   │   │   └── ...
-└── knowledge_base/         # 知识库文档存储
-```
-
----
-
-## 📝 更新日志
-
-### v2.1.0 (2025-12-12)
-- ✨ **重磅更新**：新增 "顶级深度报告" (Ultra Deep Report) 功能
-- ⚡ **架构升级**：后端引入异步任务队列，解决云端部署超时问题
-- 🔄 **交互优化**：前端支持任务状态实时轮询
-- 📝 **文档更新**：更新部署文档适配 Render Persistent Disk
-
-### v2.0.0 (2025-12-10)
-- ✨ 新增 AI 智能投顾功能 (Google Gemini)
-- ✨ 新增知识库管理系统
-- ✨ 新增深度研报生成器
-- ✨ 新增多用户认证系统 (Supabase Auth)
-- ✨ 新增数据隔离和 RLS 安全策略
-
----
-
-## 📄 许可证
-
-本项目仅供学习和研究使用。
-
----
-
-## 🤝 贡献
-
-欢迎提交 Issue 和 Pull Request！
-
----
-
-**⭐ 如果这个项目对你有帮助，请给个 Star！**
+*本项目仅供技术研究与学习使用，不构成任何投资建议。*
