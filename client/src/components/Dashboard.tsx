@@ -179,7 +179,7 @@ function AnalyticsSection({ data, holdings }: { data: AnalysisData, holdings: Ho
     }, [data]);
 
     return (
-        <div className="mb-12 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="mb-8 md:mb-12 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
             {/* Title */}
             <div className="flex items-center gap-2 mb-6 border-b-2 border-black pb-2">
                 <Activity className="w-5 h-5" />
@@ -479,14 +479,14 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
     return (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Top Bar / Tab Switcher */}
-            <div className="flex justify-between items-center mb-8 border-b-2 border-gray-100 pb-2">
-                <div className="flex gap-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 md:mb-8 border-b-2 border-gray-100 pb-2 gap-4 md:gap-0">
+                <div className="flex gap-4 md:gap-8 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
                     <button
                         onClick={() => {
                             setCurrentTab('portfolio');
                             onTabChange?.('portfolio');
                         }}
-                        className={cn("flex items-center gap-2 pb-4 border-b-4 transition-colors font-bold tracking-widest",
+                        className={cn("flex items-center gap-2 pb-4 border-b-4 transition-colors font-bold tracking-widest whitespace-nowrap",
                             currentTab === 'portfolio' ? "border-black text-black" : "border-transparent text-gray-400 hover:text-gray-600"
                         )}
                     >
@@ -498,7 +498,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                             setCurrentTab('advisor');
                             onTabChange?.('advisor');
                         }}
-                        className={cn("flex items-center gap-2 pb-4 border-b-4 transition-colors font-bold tracking-widest",
+                        className={cn("flex items-center gap-2 pb-4 border-b-4 transition-colors font-bold tracking-widest whitespace-nowrap",
                             currentTab === 'advisor' ? "border-neon text-black" : "border-transparent text-gray-400 hover:text-gray-600"
                         )}
                     >
@@ -510,7 +510,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                 <button
                     onClick={fetchPortfolio}
                     disabled={loading}
-                    className="flex items-center gap-2 px-4 py-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-all font-bold text-sm tracking-wider disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 px-4 py-2 border-2 border-black bg-white hover:bg-black hover:text-white transition-all font-bold text-sm tracking-wider disabled:opacity-50 disabled:cursor-not-allowed w-full md:w-auto justify-center"
                     title="刷新数据"
                 >
                     <RefreshCw size={16} className={cn(loading && "animate-spin")} />
@@ -529,25 +529,25 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
             ) : (
                 <>
                     {/* Header / Overview Card */}
-                    <div className="grid grid-cols-12 gap-8 mb-12">
+                    <div className="flex flex-col md:grid md:grid-cols-12 gap-8 mb-8 md:mb-12">
                         <div className="col-span-12 lg:col-span-8">
                             <h2 className="text-sm font-bold font-serif text-gray-500 mb-2 tracking-widest">总资产净值 ({overview?.currency || 'USD'})</h2>
-                            <div className="text-8xl font-black tracking-tighter leading-none mb-6 font-mono text-black">
+                            <div className="text-5xl md:text-8xl font-black tracking-tighter leading-none mb-6 font-mono text-black">
                                 {overview ? formatMoney(overview.total_market_value, overview.currency) : '---'}
                             </div>
-                            <div className="flex gap-12 items-baseline border-t border-black pt-4">
+                            <div className="flex flex-col md:flex-row gap-6 md:gap-12 items-start md:items-baseline border-t border-black pt-4">
                                 <div>
                                     <span className="text-xs font-bold text-gray-500 font-serif">总盈亏</span>
-                                    <div className={cn("text-3xl font-black font-mono mt-1", (overview?.total_pl || 0) >= 0 ? "text-neon-dim" : "text-red-600")}>
+                                    <div className={cn("text-2xl md:text-3xl font-black font-mono mt-1", (overview?.total_pl || 0) >= 0 ? "text-neon-dim" : "text-red-600")}>
                                         {overview ? `${overview.total_pl >= 0 ? '+' : ''}${formatMoney(overview.total_pl, overview.currency)}` : '---'}
-                                        <span className="ml-2 text-lg opacity-60 font-medium">
+                                        <span className="ml-2 text-base md:text-lg opacity-60 font-medium">
                                             ({overview?.total_pl_pct != null ? overview.total_pl_pct.toFixed(2) : '0.00'}%)
                                         </span>
                                     </div>
                                 </div>
                                 <div>
                                     <span className="text-xs font-bold text-gray-500 font-serif">今日盈亏</span>
-                                    <div className={cn("text-3xl font-black font-mono mt-1", (overview?.day_pl || 0) >= 0 ? "text-neon-dim" : "text-red-600")}>
+                                    <div className={cn("text-2xl md:text-3xl font-black font-mono mt-1", (overview?.day_pl || 0) >= 0 ? "text-neon-dim" : "text-red-600")}>
                                         {overview ? `${overview.day_pl >= 0 ? '+' : ''}${formatMoney(overview.day_pl, overview.currency)}` : '---'}
                                     </div>
                                 </div>
@@ -578,7 +578,7 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
 
                     {/* Holdings Table */}
                     <div className="border-t-4 border-black">
-                        <div className="grid grid-cols-12 border-b-2 border-black py-4 text-sm font-bold font-serif text-gray-500">
+                        <div className="hidden md:grid grid-cols-12 border-b-2 border-black py-4 text-sm font-bold font-serif text-gray-500">
                             {/* Asset Name: 2 cols */}
                             <div 
                                 className="col-span-2 pl-2 cursor-pointer hover:text-black transition-colors flex items-center gap-1"
@@ -620,62 +620,130 @@ export function Dashboard({ onNavigate, onNavigateKnowledgeBase, userId, initial
                             sortHoldings(holdings).map((h) => (
                                 <div 
                                     key={h.symbol} 
-                                    className="grid grid-cols-12 border-b border-gray-200 py-5 items-center hover:bg-gray-50 group transition-colors"
+                                    className="border-b border-gray-200 hover:bg-gray-50 group transition-colors"
                                 >
-                                    {/* Asset Name: 2 cols */}
-                                    <div 
-                                        onClick={() => onNavigate(h.symbol)}
-                                        className="col-span-2 pl-2 cursor-pointer hover:underline decoration-2 underline-offset-4"
-                                        title="点击查看详情"
-                                    >
-                                        <div className="font-black text-xl tracking-tight leading-none font-mono text-black flex items-center gap-2">
-                                            {h.symbol}
+                                    {/* Mobile Card Layout */}
+                                    <div className="md:hidden p-4 flex flex-col gap-4" onClick={() => onNavigate(h.symbol)}>
+                                        {/* Top: Symbol + Price Info */}
+                                        <div className="flex justify-between items-start">
+                                            <div>
+                                                <div className="font-black text-2xl font-mono text-black">{h.symbol}</div>
+                                                <div className="text-xs text-gray-500 font-serif truncate max-w-[150px]">{h.name}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="font-mono text-lg font-bold">{formatMoney(h.current_price, h.currency)}</div>
+                                                <div className={cn("font-bold text-sm", h.day_change_pct >= 0 ? "text-green-600" : "text-red-600")}>
+                                                    {h.day_change_pct > 0 ? '+' : ''}{h.day_change_pct.toFixed(2)}%
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="text-xs text-gray-500 mt-1 font-serif truncate">{h.name}</div>
-                                    </div>
-                                    
-                                    {/* Summary: 2 cols (Compact) */}
-                                    <div className="col-span-2 pr-2 overflow-hidden">
-                                         <CompanySummary symbol={h.symbol} />
-                                    </div>
-                                    <div className="col-span-1 text-right font-mono text-sm text-gray-600">
-                                        <EditableCell 
-                                            value={h.cost_basis} 
-                                            onSave={(v) => handleUpdateStock(h.symbol, 'cost_basis', v)}
-                                            type="number"
-                                            format={(v) => formatMoney(Number(v), h.currency)}
-                                        />
-                                    </div>
-                                    <div className="col-span-1 text-right font-mono text-sm">
-                                        <div>{formatMoney(h.current_price, h.currency)}</div>
-                                    </div>
-                                    <div className="col-span-1 text-right font-mono text-lg">
-                                        <div className={cn("font-bold", h.day_change_pct >= 0 ? "text-green-600" : "text-red-600")}>
-                                            {h.day_change_pct > 0 ? '+' : ''}{h.day_change_pct.toFixed(2)}%
+                                        
+                                        {/* Middle: Highlighted Market Value */}
+                                        <div className="flex justify-between items-end bg-gray-100 p-3 -mx-4 border-y border-gray-200">
+                                            <div>
+                                                <div className="text-[10px] text-gray-400 uppercase tracking-wider font-bold mb-1">Market Value</div>
+                                                <div className="font-black text-xl font-mono">{formatMoney(h.market_value, h.currency)}</div>
+                                            </div>
+                                            <div className="text-right">
+                                                 <div className="text-[10px] text-gray-400 uppercase tracking-wider font-bold mb-1">P/L</div>
+                                                 <div className={cn("font-bold text-xl font-mono", h.unrealized_pl >= 0 ? "text-black" : "text-red-600")}>
+                                                    {h.unrealized_pl > 0 ? '+' : ''}{h.unrealized_pl_pct.toFixed(0)}%
+                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Bottom: Details & Actions */}
+                                        <div className="flex justify-between items-center text-sm pt-1">
+                                            <div className="flex gap-4 font-mono">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-gray-400 text-xs">Vol:</span>
+                                                    <EditableCell 
+                                                        value={h.shares} 
+                                                        onSave={(v) => handleUpdateStock(h.symbol, 'shares', v)} 
+                                                        type="number"
+                                                        className="border-gray-200"
+                                                    />
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-gray-400 text-xs">Avg:</span>
+                                                    <EditableCell 
+                                                        value={h.cost_basis} 
+                                                        onSave={(v) => handleUpdateStock(h.symbol, 'cost_basis', v)} 
+                                                        type="number"
+                                                        className="border-gray-200"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <button 
+                                                onClick={(e) => handleRemove(h.symbol, e)} 
+                                                className="text-gray-300 hover:text-red-600 p-2"
+                                            >
+                                                <Trash2 size={18}/>
+                                            </button>
+                                        </div>
+                                        
+                                        <div className="mt-2 text-gray-400 text-[10px] leading-tight line-clamp-2">
+                                            <CompanySummary symbol={h.symbol} />
                                         </div>
                                     </div>
-                                    <div className="col-span-1 text-right font-mono text-gray-600 text-lg font-bold">
-                                        <EditableCell 
-                                            value={h.shares} 
-                                            onSave={(v) => handleUpdateStock(h.symbol, 'shares', v)}
-                                            type="number"
-                                        />
-                                    </div>
-                                    <div className="col-span-2 text-right font-mono font-black text-lg">
-                                        {formatMoney(h.market_value, h.currency)}
-                                    </div>
-                                    <div className="col-span-1 text-right font-mono">
-                                        <div className={cn("font-bold text-lg", h.unrealized_pl >= 0 ? "text-black" : "text-red-600")}>
-                                            {h.unrealized_pl > 0 ? '+' : ''}{h.unrealized_pl_pct.toFixed(0)}%
-                                        </div>
-                                    </div>
-                                    <div className="col-span-1 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <button 
-                                            onClick={(e) => handleRemove(h.symbol, e)}
-                                            className="text-gray-300 hover:text-red-600 p-2 transition-colors"
+
+                                    {/* Desktop Grid Layout */}
+                                    <div className="hidden md:grid grid-cols-12 py-5 items-center">
+                                        {/* Asset Name: 2 cols */}
+                                        <div 
+                                            onClick={() => onNavigate(h.symbol)}
+                                            className="col-span-2 pl-2 cursor-pointer hover:underline decoration-2 underline-offset-4"
+                                            title="点击查看详情"
                                         >
-                                            <Trash2 size={18} />
-                                        </button>
+                                            <div className="font-black text-xl tracking-tight leading-none font-mono text-black flex items-center gap-2">
+                                                {h.symbol}
+                                            </div>
+                                            <div className="text-xs text-gray-500 mt-1 font-serif truncate">{h.name}</div>
+                                        </div>
+                                        
+                                        {/* Summary: 2 cols (Compact) */}
+                                        <div className="col-span-2 pr-2 overflow-hidden">
+                                             <CompanySummary symbol={h.symbol} />
+                                        </div>
+                                        <div className="col-span-1 text-right font-mono text-sm text-gray-600">
+                                            <EditableCell 
+                                                value={h.cost_basis} 
+                                                onSave={(v) => handleUpdateStock(h.symbol, 'cost_basis', v)}
+                                                type="number"
+                                                format={(v) => formatMoney(Number(v), h.currency)}
+                                            />
+                                        </div>
+                                        <div className="col-span-1 text-right font-mono text-sm">
+                                            <div>{formatMoney(h.current_price, h.currency)}</div>
+                                        </div>
+                                        <div className="col-span-1 text-right font-mono text-lg">
+                                            <div className={cn("font-bold", h.day_change_pct >= 0 ? "text-green-600" : "text-red-600")}>
+                                                {h.day_change_pct > 0 ? '+' : ''}{h.day_change_pct.toFixed(2)}%
+                                            </div>
+                                        </div>
+                                        <div className="col-span-1 text-right font-mono text-gray-600 text-lg font-bold">
+                                            <EditableCell 
+                                                value={h.shares} 
+                                                onSave={(v) => handleUpdateStock(h.symbol, 'shares', v)}
+                                                type="number"
+                                            />
+                                        </div>
+                                        <div className="col-span-2 text-right font-mono font-black text-lg">
+                                            {formatMoney(h.market_value, h.currency)}
+                                        </div>
+                                        <div className="col-span-1 text-right font-mono">
+                                            <div className={cn("font-bold text-lg", h.unrealized_pl >= 0 ? "text-black" : "text-red-600")}>
+                                                {h.unrealized_pl > 0 ? '+' : ''}{h.unrealized_pl_pct.toFixed(0)}%
+                                            </div>
+                                        </div>
+                                        <div className="col-span-1 flex justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button 
+                                                onClick={(e) => handleRemove(h.symbol, e)}
+                                                className="text-gray-300 hover:text-red-600 p-2 transition-colors"
+                                            >
+                                                <Trash2 size={18} />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             ))

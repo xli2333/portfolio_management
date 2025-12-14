@@ -449,29 +449,29 @@ ${result.file_record.filename}\
     };
 
     return (
-        <div className="animate-in slide-in-from-right-8 duration-500 flex flex-col h-[calc(100vh-200px)]">
+        <div className="animate-in slide-in-from-right-8 duration-500 flex flex-col h-[calc(100vh-80px)] md:h-[calc(100vh-200px)]">
             {/* Top Bar */}
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-4 md:mb-6 shrink-0">
                 <button 
                     onClick={onBack}
                     className="flex items-center gap-2 text-sm font-bold font-serif tracking-widest text-gray-400 hover:text-black transition-colors"
                 >
-                    <ArrowLeft size={16} /> 返回 AI 投顾中心
+                    <ArrowLeft size={16} /> <span className="hidden md:inline">返回 AI 投顾中心</span>
                 </button>
                 <div className="text-right">
-                    <div className="text-4xl font-black font-mono tracking-tighter leading-none">{symbol}</div>
+                    <div className="text-2xl md:text-4xl font-black font-mono tracking-tighter leading-none">{symbol}</div>
                     <div className="text-xs font-serif font-bold text-gray-400">KNOWLEDGE BASE</div>
                 </div>
             </div>
 
-            <div className="grid grid-cols-12 gap-6 flex-1 min-h-0">
-                {/* Left: Upload & Files */}
-                <div className="col-span-4 flex flex-col gap-4 min-h-0">
+            <div className="flex flex-col md:grid md:grid-cols-12 gap-6 flex-1 min-h-0">
+                {/* Left: Upload & Files (Mobile: Horizontal Scroll Strip, Desktop: Vertical List) */}
+                <div className="w-full md:col-span-4 flex flex-row md:flex-col gap-4 min-h-0 overflow-x-auto md:overflow-visible snap-x snap-mandatory pb-2 md:pb-0 shrink-0">
                     {/* Upload Box */}
                     <div 
                         onClick={() => fileInputRef.current?.click()}
                         className={cn(
-                            "bg-gray-50 border-2 border-dashed border-gray-300 rounded-none p-6 flex flex-col items-center justify-center text-gray-400 hover:bg-gray-100 hover:border-black hover:text-black transition-all cursor-pointer group shrink-0",
+                            "min-w-[160px] md:min-w-0 md:w-auto bg-gray-50 border-2 border-dashed border-gray-300 rounded-none p-6 flex flex-col items-center justify-center text-gray-400 hover:bg-gray-100 hover:border-black hover:text-black transition-all cursor-pointer group shrink-0 snap-start",
                             uploading && "opacity-50 pointer-events-none"
                         )}
                     >
@@ -483,11 +483,46 @@ ${result.file_record.filename}\
                             className="hidden" 
                         />
                         <Upload size={32} className={cn("mb-2 group-hover:scale-110 transition-transform", uploading && "animate-bounce")} />
-                        <div className="font-bold font-serif text-sm">{uploading ? '上传中...' : '上传 PDF 资料'}</div>
+                        <div className="font-bold font-serif text-sm whitespace-nowrap">{uploading ? '上传中...' : '上传 PDF'}</div>
                     </div>
 
-                    {/* File List */}
-                    <div className="flex-1 border-2 border-black p-0 overflow-hidden flex flex-col bg-white">
+                    {/* Mobile File List (Horizontal Cards) */}
+                    {documents.map(doc => {
+                        const isSelected = selectedIds.has(doc.id);
+                        return (
+                            <div 
+                                key={`mobile-${doc.id}`}
+                                onClick={() => toggleSelection(doc.id)}
+                                className={cn(
+                                    "md:hidden min-w-[200px] p-4 border-2 flex flex-col justify-between gap-2 cursor-pointer transition-all snap-start shrink-0",
+                                    isSelected ? "border-black bg-black text-white" : "border-gray-200 bg-white"
+                                )}
+                            >
+                                <div className="flex justify-between items-start gap-2">
+                                    <div className={cn("font-bold text-sm line-clamp-2 leading-tight", isSelected ? "text-white" : "text-black")}>
+                                        {doc.filename}
+                                    </div>
+                                    <div className="mt-0.5 shrink-0">
+                                        {isSelected ? <CheckSquare size={16} className="text-neon" /> : <Square size={16} className="text-gray-300" />}
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-end mt-2">
+                                     <span className={cn("text-[10px] font-mono", isSelected ? "text-gray-400" : "text-gray-400")}>
+                                        {formatSize(doc.file_size)}
+                                     </span>
+                                     <button 
+                                        onClick={(e) => handleTogglePin(doc.id, e)}
+                                        className={cn("p-1", doc.is_pinned ? "text-neon-dark" : "text-gray-300")}
+                                     >
+                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill={doc.is_pinned ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 17v5"/><path d="M15 9.4L18.35 6.65a1 1 0 0 0 0-1.41l-2.19-2.19a1 1 0 0 0-1.41 0L12 4.6 8.65 1.25a1 1 0 0 0-1.41 0L5.05 3.44a1 1 0 0 0 0 1.41L8 8l-2 3-3 1v3h3l2 3h3z"/></svg>
+                                     </button>
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    {/* Desktop File List Container (Vertical) */}
+                    <div className="hidden md:flex flex-1 border-2 border-black p-0 overflow-hidden flex-col bg-white">
                         <div className="p-3 border-b-2 border-gray-100 bg-gray-50 flex justify-between items-center">
                             <h3 className="font-bold font-serif text-sm flex items-center gap-2">
                                 <FileText size={14} /> 文档列表 ({documents.length})
@@ -555,20 +590,20 @@ ${result.file_record.filename}\
                 </div>
 
                 {/* Right: Embedded AI Chat */}
-                <div className="col-span-8 border-2 border-black flex flex-col bg-white relative shadow-lg h-full overflow-hidden">
+                <div className="w-full md:col-span-8 border-2 border-black flex flex-col bg-white relative shadow-lg flex-1 min-h-[50vh] md:min-h-0 overflow-hidden">
                     {/* Chat Header / Controls */}
-                    <div className="p-3 border-b-2 border-black bg-gray-50 flex justify-between items-center shrink-0">
+                    <div className="p-3 border-b-2 border-black bg-gray-50 flex flex-col md:flex-row justify-between items-start md:items-center shrink-0 gap-3 md:gap-0">
                         <div className="flex items-center gap-2">
                             <Bot size={20} className="text-black" />
                             <span className="font-bold font-serif text-sm">AI 分析师</span>
                         </div>
-                        <div className="flex gap-2 items-center">
+                        <div className="flex gap-2 items-center w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
                             {selectedMessageIndices.size > 0 && (
                                 <button 
                                     onClick={handleSaveChat}
-                                    className="bg-black text-white text-xs font-bold px-3 py-1 hover:bg-neon hover:text-black transition-colors flex items-center gap-1"
+                                    className="bg-black text-white text-xs font-bold px-3 py-1 hover:bg-neon hover:text-black transition-colors flex items-center gap-1 whitespace-nowrap"
                                 >
-                                    <Paperclip size={12} /> 保存 ({selectedMessageIndices.size})
+                                    <Paperclip size={12} /> <span className="hidden sm:inline">保存</span>({selectedMessageIndices.size})
                                 </button>
                             )}
 
@@ -576,7 +611,7 @@ ${result.file_record.filename}\
                                 onClick={() => handleGenerateReport()}
                                 disabled={generatingReport}
                                 className={cn(
-                                    "text-xs font-black uppercase tracking-wider px-3 py-1 transition-colors flex items-center gap-1",
+                                    "text-xs font-black uppercase tracking-wider px-3 py-1 transition-colors flex items-center gap-1 whitespace-nowrap",
                                     generatingReport ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-neon text-black hover:bg-neon-dim"
                                 )}
                             >
@@ -587,7 +622,7 @@ ${result.file_record.filename}\
                                 onClick={handleOpenUltraDeepModal}
                                 disabled={ultraDeepLoading}
                                 className={cn(
-                                    "text-xs font-black uppercase tracking-wider px-3 py-1 transition-colors flex items-center gap-1",
+                                    "text-xs font-black uppercase tracking-wider px-3 py-1 transition-colors flex items-center gap-1 whitespace-nowrap",
                                     ultraDeepLoading ? "bg-gray-200 text-gray-400 cursor-not-allowed" : "bg-black text-white hover:bg-gray-800 border-2 border-black"
                                 )}
                                 title="使用 Google 官方 Deep Research API 生成超级深度报告（10-20分钟）"
@@ -598,20 +633,20 @@ ${result.file_record.filename}\
                             <select
                                 value={model}
                                 onChange={(e) => setModel(e.target.value)}
-                                className="bg-white border-2 border-gray-200 text-xs font-bold px-2 py-1 outline-none cursor-pointer hover:border-black transition-colors"
+                                className="bg-white border-2 border-gray-200 text-xs font-bold px-2 py-1 outline-none cursor-pointer hover:border-black transition-colors shrink-0"
                             >
-                                <option value="gemini-2.5-flash">Gemini 2.5 Flash (快速)</option>
-                                <option value="gemini-2.5-pro">Gemini 2.5 Pro (深度)</option>
+                                <option value="gemini-2.5-flash">Flash</option>
+                                <option value="gemini-2.5-pro">Pro</option>
                             </select>
                         </div>
                     </div>
                     
                     {/* Messages Area */}
-                    <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
+                    <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 md:space-y-6 bg-white">
                         {messages.length === 0 && (
                             <div className="h-full flex flex-col items-center justify-center text-gray-300 opacity-50">
-                                <div className="text-6xl font-black font-serif mb-4">AI</div>
-                                <p className="text-sm font-mono">选择左侧文档，开始深度分析...</p>
+                                <div className="text-5xl md:text-6xl font-black font-serif mb-4">AI</div>
+                                <p className="text-xs md:text-sm font-mono text-center px-4">选择上方文档，开始深度分析...</p>
                             </div>
                         )}
                         {messages.map((msg, idx) => {
@@ -621,13 +656,13 @@ ${result.file_record.filename}\
                                     {/* Selection Checkbox */}
                                     <button 
                                         onClick={() => toggleMessageSelection(idx)}
-                                        className="mt-2 text-gray-300 hover:text-black transition-colors"
+                                        className="mt-2 text-gray-300 hover:text-black transition-colors shrink-0"
                                     >
                                         {isSelected ? <CheckSquare size={16} className="text-neon-dark" /> : <Square size={16} />}
                                     </button>
 
                                     <div className={cn(
-                                        "max-w-[85%] p-4 text-sm font-medium leading-relaxed shadow-sm overflow-hidden",
+                                        "max-w-[85%] p-3 md:p-4 text-sm font-medium leading-relaxed shadow-sm overflow-hidden",
                                         msg.role === 'user' 
                                             ? "bg-black text-white" 
                                             : "bg-gray-50 border border-gray-100 text-gray-800"
@@ -663,12 +698,12 @@ ${result.file_record.filename}\
                         <div ref={messagesEndRef} />
                     </div>
 
-                    {/* Input Area */}
-                    <div className="p-4 border-t-2 border-black bg-white shrink-0">
+                    {/* Input Area (Sticky Bottom on Mobile) */}
+                    <div className="p-3 md:p-4 border-t-2 border-black bg-white shrink-0 sticky bottom-0 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                         {selectedIds.size > 0 && (
                             <div className="mb-2 flex items-center gap-1 text-[10px] font-bold text-neon-dark uppercase tracking-wider">
                                 <Paperclip size={10} />
-                                已附加 {selectedIds.size} 份资料作为上下文
+                                已附加 {selectedIds.size} 份资料
                             </div>
                         )}
                         <div className="flex gap-2 relative">
@@ -677,14 +712,14 @@ ${result.file_record.filename}\
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
-                                placeholder={selectedIds.size > 0 ? "基于选定资料提问..." : "输入问题..."}
+                                placeholder={selectedIds.size > 0 ? "提问..." : "输入问题..."}
                                 className="flex-1 bg-gray-50 border-2 border-gray-200 px-4 py-3 text-sm focus:border-black focus:ring-0 outline-none transition-colors font-medium placeholder:text-gray-400"
                                 autoFocus
                             />
                             <button 
                                 onClick={sendMessage}
                                 disabled={loading || !input.trim()}
-                                className="bg-black text-white px-6 hover:bg-neon hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-black text-white px-4 md:px-6 hover:bg-neon hover:text-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                             >
                                 <Send size={18} />
                             </button>

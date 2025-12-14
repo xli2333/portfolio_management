@@ -74,13 +74,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white text-black font-sans selection:bg-neon selection:text-black">
-      <div className="max-w-6xl mx-auto px-6 py-12">
+      <div className="max-w-6xl mx-auto px-3 py-4 md:px-6 md:py-12">
         
         {/* Global Header / Branding */}
-        <header className="mb-12 flex justify-between items-end border-b-4 border-black pb-4">
+        <header className="mb-6 md:mb-12 flex flex-col md:flex-row md:justify-between md:items-end border-b-4 border-black pb-4 gap-4 md:gap-0">
             <div>
                 <h1 
-                  className="text-4xl font-black font-serif tracking-tighter cursor-pointer hover:text-neon-dim transition-colors"
+                  className="text-2xl md:text-4xl font-black font-serif tracking-tighter cursor-pointer hover:text-neon-dim transition-colors"
                   onClick={navigateToDashboard}
                 >
                   智能投资组合系统
@@ -89,11 +89,11 @@ export default function App() {
                   版本 2.5 / 专业版
                 </div>
             </div>
-            <div className="text-right">
+            <div className="text-left md:text-right">
                  <div className="text-xs font-bold font-serif tracking-widest mb-1">
                     用户: {session?.user?.email?.split('@')[0] || 'USER'}
                  </div>
-                 <div className="flex items-center justify-end gap-4">
+                 <div className="flex items-center justify-start md:justify-end gap-4">
                     <div className="text-xs font-mono text-green-500">● ONLINE</div>
                     <button
                         onClick={handleLogout}
