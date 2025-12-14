@@ -60,14 +60,14 @@ function BigSwissGauge({ score }: { score: number }) {
   const arcPath = Math.abs(safeScore) < 1 ? "" : `M 100 20 A ${radius} ${radius} 0 ${largeArcFlag} ${sweepFlag} ${endX} ${endY}`;
 
   return (
-    <div className="w-full h-full min-h-[160px] md:min-h-[200px] flex flex-col items-center justify-center relative md:-translate-y-4 md:-translate-x-6">
-        <div className="relative w-[300px] md:w-[360px] h-[150px] md:h-[180px]">
+    <div className="w-full h-full min-h-[120px] md:min-h-[200px] flex flex-col items-center justify-center relative md:-translate-y-4 md:-translate-x-6">
+        <div className="relative w-full max-w-[300px] md:max-w-[360px] aspect-[2/1]">
             <svg viewBox="0 0 200 110" className="w-full h-full overflow-visible">
                 <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#F0F0F0" strokeWidth={strokeWidth} strokeLinecap="butt" />
                 <path d={arcPath} fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="butt" className="transition-all duration-1000 ease-out" />
-                <line x1="43.4" y1="43.4" x2="48" y2="48" stroke="black" strokeWidth="1" />
-                <line x1="156.6" y1="43.4" x2="152" y2="48" stroke="black" strokeWidth="1" />
-                <line x1="100" y1="10" x2="100" y2="18" stroke="black" strokeWidth="2" />
+                <line x1="43.4" y1="43.4" x2="48" y2="48" stroke="black" strokeWidth={1} />
+                <line x1="156.6" y1="43.4" x2="152" y2="48" stroke="black" strokeWidth={1} />
+                <line x1="100" y1="10" x2="100" y2="18" stroke="black" strokeWidth={2} />
                 <g transform={`rotate(${rotation}, 100, 100)`} className="transition-transform duration-1000 cubic-bezier(0.2, 0.8, 0.2, 1)">
                     <path d="M 100 15 L 97 100 L 103 100 Z" fill="black" />
                 </g>
@@ -77,9 +77,9 @@ function BigSwissGauge({ score }: { score: number }) {
             <div className="absolute bottom-0 left-0 text-[10px] font-bold text-gray-300 font-mono">-100</div>
             <div className="absolute bottom-0 right-0 text-[10px] font-bold text-gray-300 font-mono">+100</div>
         </div>
-        <div className="flex flex-col items-center mt-2">
-             <div className="text-5xl font-black tracking-tighter leading-none flex items-start">
-                <span className="text-2xl mt-1 opacity-50 mr-1">{score > 0 ? '+' : ''}</span>
+        <div className="flex flex-col items-center mt-[-10px] md:mt-2 relative z-10">
+             <div className="text-3xl md:text-5xl font-black tracking-tighter leading-none flex items-start">
+                <span className="text-sm md:text-2xl mt-1 opacity-50 mr-1">{score > 0 ? '+' : ''}</span>
                 {Math.round(Math.abs(score))}
              </div>
         </div>
@@ -388,42 +388,76 @@ export function Analyzer({ initialSymbol, onBack }: AnalyzerProps) {
             <main className="animate-in fade-in slide-in-from-bottom-8 duration-700">
                 
                 {/* Top Grid: Recommendation, Gauge, Regime */}
-                <div className="flex flex-wrap md:grid md:grid-cols-12 gap-4 md:gap-8 mb-8 md:mb-16 border-b border-gray-200 pb-8 md:pb-16 items-stretch">
+                <div className="flex flex-col md:grid md:grid-cols-12 md:gap-8 mb-8 md:mb-16 border-b border-gray-200 pb-8 md:pb-16 items-stretch">
                     
-                    {/* Recommendation Text - Mobile: Order 1 (Left Half) */}
-                    <div className="w-1/2 md:w-auto order-1 md:order-none md:col-span-4 flex flex-col justify-between pr-2 md:pr-0 border-r md:border-none border-gray-100">
-                        <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400 font-serif whitespace-nowrap overflow-hidden">
-                            智能投顾建议 <span className="hidden md:inline">(Recommendation)</span>
-                        </h2>
+                    {/* Mobile Wrapper for Rec & Regime */}
+                    <div className="order-1 md:order-none md:contents">
+                        
+                        {/* Mobile Container: Gray Box */}
+                        <div className="md:hidden bg-gray-50 p-4 mb-4 flex justify-between items-center rounded-sm">
+                            {/* Left: Recommendation */}
+                            <div className="flex flex-col">
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 font-serif mb-1">
+                                    智能投顾建议
+                                </h2>
+                                <div className="flex items-baseline gap-2">
+                                    <div className="text-2xl font-black tracking-tighter leading-none font-serif">
+                                        {result.comprehensive_score.recommendation}
+                                    </div>
+                                    <div className="text-[10px] font-mono bg-black text-white px-1.5 py-0.5 rounded-sm">
+                                        {Math.round(result.comprehensive_score.score)}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right: Regime */}
+                            <div className="flex flex-col items-end text-right">
+                                <h2 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 font-serif mb-1">
+                                    市场状态
+                                </h2>
+                                <div className="text-xl font-bold uppercase font-serif tracking-tight text-gray-800">
+                                    {result.comprehensive_score.regime}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Desktop: Recommendation (Hidden on mobile via 'md:flex' logic below, but we need to structure it carefully to avoid dupes) 
+                           Actually, since we used 'md:contents', we can keep the desktop structure as direct children of the grid. 
+                           But to solve the 'order' issue cleanly, let's duplicate the DOM for mobile/desktop to ensure perfect control without messy overrides.
+                        */}
+                    </div>
+
+                    {/* Recommendation (Desktop Only) */}
+                    <div className="hidden md:flex col-span-12 md:col-span-4 flex-col justify-between">
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 font-serif">智能投顾建议 (Recommendation)</h2>
                         <div>
-                            <div className="text-3xl md:text-5xl font-black tracking-tighter leading-none mb-2 font-serif">
+                            <div className="text-5xl font-black tracking-tighter leading-none mb-2 font-serif">
                                 {result.comprehensive_score.recommendation}
                             </div>
-                            <div className="text-[10px] md:text-sm font-mono bg-black text-white px-2 md:px-3 py-1 inline-block">
+                            <div className="text-sm font-mono bg-black text-white px-3 py-1 inline-block">
                                 评分: {Math.round(result.comprehensive_score.score)}
                             </div>
                         </div>
                     </div>
 
-                    {/* Big Swiss Gauge - Mobile: Order 3 (Bottom Full Width) */}
-                    <div className="w-full md:w-auto order-3 md:order-none md:col-span-4 mt-4 md:mt-0">
+                    {/* Big Swiss Gauge - Mobile: Order 2 (Bottom) */}
+                    <div className="w-full md:w-auto order-2 md:order-none md:col-span-4">
                         <BigSwissGauge score={result.comprehensive_score.score} />
                     </div>
 
-                    {/* Regime Analysis - Mobile: Order 2 (Right Half) */}
-                    <div className="w-1/2 md:w-auto order-2 md:order-none md:col-span-4 flex flex-col justify-between text-right pl-2 md:pl-0">
-                            <h2 className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400 font-serif whitespace-nowrap overflow-hidden">
-                                市场状态分析 <span className="hidden md:inline">(Regime)</span>
-                            </h2>
-                            <div>
-                            <div className="text-xl md:text-3xl font-bold uppercase font-serif truncate">
+                    {/* Regime (Desktop Only) */}
+                    <div className="hidden md:flex col-span-12 md:col-span-4 flex-col justify-between text-right">
+                        <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 font-serif">市场状态分析 (Regime)</h2>
+                        <div>
+                            <div className="text-3xl font-bold uppercase font-serif">
                                 {result.comprehensive_score.regime}
                             </div>
-                            <div className="text-[10px] md:text-sm text-gray-500 mt-1 md:mt-2 leading-snug font-serif hidden md:block">
+                            <div className="text-sm text-gray-500 mt-2 leading-snug font-serif">
                                 基于波动率与动量因子，当前市场呈现强烈的 {result.comprehensive_score.regime} 特征。
                             </div>
-                            </div>
+                        </div>
                     </div>
+
                 </div>
 
                 {/* Chart Section */}
