@@ -707,6 +707,12 @@ def analyze():
                 else:
                     adv_safe[k] = v
 
+            # Force update name from A-share map if available (Fix for Analyzer header display)
+            if analyzer.stock_info and 'code' in analyzer.stock_info and analyzer.stock_info['code'].isdigit():
+                code = analyzer.stock_info['code']
+                if hasattr(portfolio_service, 'a_share_map') and code in portfolio_service.a_share_map:
+                    analyzer.stock_info['name'] = portfolio_service.a_share_map[code]
+
             result = {
                 'stock_info': analyzer.stock_info,
                 'price_info': analyzer.get_price_info(),
